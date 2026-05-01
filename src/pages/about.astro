@@ -1,0 +1,100 @@
+---
+import Base from "../layouts/Base.astro";
+
+const skills = [
+  "TypeScript",
+  "Remix",
+  "Prisma",
+  "Node.js",
+  "Shopify",
+  "PostgreSQL & MySQL",
+];
+
+const testimonials = [
+  {
+    quote:
+      "He works hard, thinks outside of the box and is dedicated to deep work principles.",
+    name: "Seva Mouler",
+    title: "CEO",
+  },
+  {
+    quote:
+      "Excellent knowledge of the Shopify platform combined with a strong work ethic.",
+    name: "Harry Molyneux",
+    title: "CRO Specialist",
+  },
+  {
+    quote:
+      "Knowledgeable and resourceful — looking forward to future projects together.",
+    name: "Enrique Ramirez",
+    title: "CEO & Cofounder",
+  },
+];
+---
+
+<Base title="About">
+  <section class="max-w-2xl mx-auto px-6 pt-16 pb-10">
+    <p
+      class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-3"
+    >
+      About
+    </p>
+    <h1
+      class="text-3xl sm:text-4xl font-semibold tracking-tight mb-6"
+      style="font-family: var(--font-serif);"
+    >
+      Building high-impact Shopify apps & themes
+    </h1>
+    <div class="space-y-5 text-[var(--color-ink)] leading-relaxed">
+      <p>
+        I'm a full-stack developer with deep expertise in JavaScript,
+        TypeScript, and Shopify APIs. For over a decade I've helped merchants
+        and agencies ship reliable e-commerce experiences — from custom apps
+        and storefront themes to internal tooling and migrations.
+      </p>
+      <p>
+        I value deep work, simple architectures, and code that stays out of the
+        way. Most of my projects sit at the intersection of automation,
+        merchant UX, and conversion.
+      </p>
+    </div>
+  </section>
+
+  <section class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]">
+    <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-4">
+      Stack
+    </h2>
+    <ul class="flex flex-wrap gap-2">
+      {
+        skills.map((s) => (
+          <li class="text-sm border border-[var(--color-rule)] rounded-full px-3 py-1 bg-[var(--color-surface)]">
+            {s}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]">
+    <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-6">
+      What clients say
+    </h2>
+    <ul class="space-y-8">
+      {
+        testimonials.map((t) => (
+          <li>
+            <p
+              class="text-[var(--color-ink)] leading-relaxed"
+              style="font-family: var(--font-serif);"
+            >
+              "{t.quote}"
+            </p>
+            <p class="mt-3 text-sm text-[var(--color-muted)]">
+              {t.name} · {t.title}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>

@@ -1,0 +1,45 @@
+---
+import { NAV, SITE } from "../consts";
+
+const pathname = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === "/" ? pathname === "/" : pathname.startsWith(href);
+---
+
+<header class="border-b border-[var(--color-rule)]">
+  <div class="max-w-2xl mx-auto px-6 py-5 flex items-center justify-between">
+    <a
+      href="/"
+      class="font-semibold no-underline tracking-tight flex items-center gap-2.5"
+    >
+      <img
+        src="/logo.svg"
+        alt=""
+        width="32"
+        height="32"
+        class="block h-8 w-8 max-w-none shrink-0 object-contain"
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+      />
+      <span class="sr-only">{SITE.author}</span>
+    </a>
+    <nav class="flex gap-5 text-sm">
+      {
+        NAV.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "no-underline",
+              isActive(item.href)
+                ? "text-[var(--color-accent)]"
+                : "text-[var(--color-muted)] hover:text-[var(--color-ink)]",
+            ]}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>

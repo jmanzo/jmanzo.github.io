@@ -1,0 +1,35 @@
+{
+  "name": "jmanzo.github.io",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "migrate:wp": "node scripts/migrate-wp.mjs"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^5.0.4",
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/sitemap": "^3.7.2",
+    "@tailwindcss/vite": "^4.2.4",
+    "astro": "^6.2.1",
+    "sharp": "^0.34.5",
+    "tailwindcss": "^4.2.4"
+  },
+  "packageManager": "pnpm@10.30.2",
+  "devDependencies": {
+    "@types/turndown": "^5.0.6",
+    "turndown": "^7.2.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ]
+  }
+}

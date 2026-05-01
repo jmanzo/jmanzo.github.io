@@ -1,0 +1,64 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
+const items = (await getCollection("work")).sort(
+  (a, b) => (b.data.order ?? 0) - (a.data.order ?? 0)
+);
+---
+
+<Base title="Work">
+  <section class="max-w-2xl mx-auto px-6 pt-16 pb-8">
+    <p class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-3">
+      Work
+    </p>
+    <h1
+      class="text-3xl sm:text-4xl font-semibold tracking-tight"
+      style="font-family: var(--font-serif);"
+    >
+      Selected projects
+    </h1>
+  </section>
+
+  <section class="max-w-2xl mx-auto px-6 pb-16">
+    <ul class="divide-y divide-[var(--color-rule)]">
+      {
+        items.map((item) => (
+          <li class="py-6">
+            <div class="flex items-baseline justify-between gap-4 mb-2">
+              <h2 class="font-medium text-lg">
+                {(() => {
+                  const url = item.data.url;
+                  if (!url) return <a href={`/work/${item.id}/`}>{item.data.title}</a>;
+                  const isExternal = /^https?:\/\//.test(url);
+                  return isExternal ? (
+                    <a href={url} target="_blank" rel="noopener noreferrer">
+                      {item.data.title}
+                    </a>
+                  ) : (
+                    <a href={url}>{item.data.title}</a>
+                  );
+                })()}
+              </h2>
+              <span class="text-sm text-[var(--color-muted)] tabular-nums shrink-0">
+                {item.data.year}
+              </span>
+            </div>
+            <p class="text-[var(--color-muted)] leading-relaxed">
+              {item.data.description}
+            </p>
+            {item.data.stack && (
+              <ul class="mt-3 flex flex-wrap gap-2">
+                {item.data.stack.map((s) => (
+                  <li class="text-xs text-[var(--color-muted)] border border-[var(--color-rule)] rounded-full px-2.5 py-0.5">
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>

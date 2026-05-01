@@ -1,0 +1,127 @@
+---
+import Base from "../layouts/Base.astro";
+import { getCollection } from "astro:content";
+import { SOCIALS } from "../consts";
+import SocialIcon from "../components/SocialIcon.astro";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 4);
+
+const work = (await getCollection("work"))
+  .sort((a, b) => (b.data.order ?? 0) - (a.data.order ?? 0))
+  .slice(0, 4);
+---
+
+<Base>
+  <section class="max-w-2xl mx-auto px-6 pt-20 pb-12">
+    <h1
+      class="text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.1] mb-6"
+      style="font-family: var(--font-serif);"
+    >
+      Jean Manzo
+    </h1>
+    <p class="text-lg text-[var(--color-ink)] leading-relaxed max-w-xl">
+      Full-stack developer with 10+ years of experience, specializing in
+      Shopify apps and themes that boost sales, automate operations, and keep
+      merchants happy.
+    </p>
+    <p class="mt-5 text-[var(--color-muted)]">
+      Currently working with <a
+        href="https://www.vaangroup.com"
+        class="text-[var(--color-ink)]"
+        target="_blank"
+        rel="noopener noreferrer">Vaangroup</a
+      > — a Shopify Plus agency.
+    </p>
+    <ul class="socials mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+      {
+        SOCIALS.map((s) => (
+          <li class="socials__item">
+            <a
+              class="socials__link no-underline inline-flex items-center gap-2"
+              href={s.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={s.label}
+            >
+              <SocialIcon name={s.icon} class="socials__icon" />
+              <span>{s.label}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {
+    work.length > 0 && (
+      <section class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]">
+        <div class="flex items-baseline justify-between mb-6">
+          <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)]">
+            Selected work
+          </h2>
+          <a href="/work/" class="text-sm text-[var(--color-muted)]">
+            All →
+          </a>
+        </div>
+        <ul class="space-y-4">
+          {work.map((item) => (
+            <li class="flex items-baseline justify-between gap-4">
+              <div class="min-w-0">
+                <a
+                  href={item.data.url ?? `/work/${item.id}/`}
+                  class="font-medium no-underline hover:text-[var(--color-accent)]"
+                >
+                  {item.data.title}
+                </a>
+                <span class="text-[var(--color-muted)]">
+                  {" "}— {item.data.description}
+                </span>
+              </div>
+              <span class="text-sm text-[var(--color-muted)] tabular-nums shrink-0">
+                {item.data.year}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    posts.length > 0 && (
+      <section class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]">
+        <div class="flex items-baseline justify-between mb-6">
+          <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)]">
+            Writing
+          </h2>
+          <a href="/blog/" class="text-sm text-[var(--color-muted)]">
+            All →
+          </a>
+        </div>
+        <ul class="space-y-4">
+          {posts.map((post) => (
+            <li class="flex items-baseline justify-between gap-4">
+              <a
+                href={`/blog/${post.id}/`}
+                class="no-underline hover:text-[var(--color-accent)] min-w-0"
+              >
+                {post.data.title}
+              </a>
+              <time
+                datetime={post.data.pubDate.toISOString()}
+                class="text-sm text-[var(--color-muted)] tabular-nums shrink-0"
+              >
+                {post.data.pubDate.toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                })}
+              </time>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</Base>
