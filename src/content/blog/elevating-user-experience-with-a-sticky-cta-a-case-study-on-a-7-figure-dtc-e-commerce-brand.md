@@ -1,6 +1,6 @@
 ---
 title: "Elevating User Experience with a Sticky CTA: A Case Study on a 7-Figure DTC e-commerce brand"
-description: "In the ever-evolving world of e-commerce and CRO, optimizing the user experience is crucial for driving conversions and boosting revenue. At DTC Pages (the company I work for), we’re all about push…"
+description: "A case study on building a sticky CTA button for a 7-figure DTC Shopify product page: the approach, the technical implementation, and the conversion results."
 pubDate: 2024-07-02
 updatedDate: 2025-07-08
 tags: ["cro", "case-study", "shopify"]

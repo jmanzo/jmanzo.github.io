@@ -1,6 +1,6 @@
 ---
 title: "Cursor AI & Shopify: What’s Worked for Me (and Hasn’t)"
-description: "After months of pushing hard with Cursor + LLMs on real projects, this is what I’ve learned so far: what AI truly accelerates, where it quietly slows you down, and the habits that have kept my code…"
+description: "What building real Shopify projects with Cursor and LLMs taught me: where AI speeds you up, where it slows you down, and the habits that keep code shippable."
 pubDate: 2025-09-03
 tags: ["ai", "shopify"]
 ---

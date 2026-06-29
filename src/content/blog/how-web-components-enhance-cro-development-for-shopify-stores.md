@@ -1,6 +1,6 @@
 ---
 title: "How Web Components Enhance CRO Development for Shopify Stores"
-description: "What is CRO or Conversion Rate Optimization? TLDR: It’s a series of A/B Testing made over diverse elements and features on your website, that allows merchants to know their customer’s preferences.…"
+description: "How Web Components (custom elements and Shadow DOM) make CRO and A/B testing on Shopify cleaner, reusable, and easier to maintain across experiments."
 pubDate: 2025-04-26
 updatedDate: 2025-05-03
 tags: ["cro", "shopify"]

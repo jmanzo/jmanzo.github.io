@@ -1,6 +1,6 @@
 ---
 title: "Introducing Crowdlify: Solving the Mess After Crowdfunding and post-purchase"
-description: "Introducing Crowdlify: the solution to the chaos that follows a successful crowdfunding campaign. After the excitement of raising funds, creators often face overwhelming challenges: managing backer…"
+description: "Why I built Crowdlify: a Shopify-connected portal that fixes the post-crowdfunding mess of backer CSVs, variant mismatches, discounts, and delayed fulfillment."
 pubDate: 2026-02-19
 updatedDate: 2026-05-01
 tags: ["journal", "case-study", "shopify"]
@@ -9,7 +9,7 @@ A few years ago, I noticed a pattern with a client I worked with: he ran a succe
 
 **_TLDR:_** I built [Crowdlify](https://github.com/jmanzo/crowdlify-official) because of the gap between a successful campaign, stressful operations and Shopify workflow for creators.
 
-![](../../assets/blog/crowdlify-journal/1.png)
+![Crowdlify, a portal for managing post-crowdfunding fulfillment on Shopify](../../assets/blog/crowdlify-journal/1.png)
 
 ## **The Problem:**
 
@@ -80,7 +80,7 @@ Internally, it was coded with Typescript, which was great for planning and gener
 
 Typescript offers great convenience for AI generation because it’s a typed language, allowing the AI to predict and provide context on its own. It comes with typecheck commands that allow quick testing while generating code live. It’s just outstanding behavior, almost magical.
 
-![](../../assets/blog/crowdlify-journal/2.png)
+![Crowdlify technical architecture and Shopify integration](../../assets/blog/crowdlify-journal/2.png)
 
 ## **The Real Challenges**
 
@@ -146,7 +146,7 @@ Every manual override becomes a future support ticket for my newest version.
 
 [Crowdlify](https://github.com/jmanzo/crowdlify-official) wasn’t designed to be flexible at the cost of stability. I wanted it to be predictable.
 
-![](../../assets/blog/crowdlify-journal/3.png)
+![Crowdlify backer claim and survey flow](../../assets/blog/crowdlify-journal/3.png)
 
 ## **My Hardest Lesson**s
 
@@ -178,7 +178,7 @@ I believe it isn’t fair for clients, users, and people worldwide not to benefi
 
 Do it professionally, carefully, and thoughtfully. That’s all. Everything is gonna be all right.
 
-![](../../assets/blog/crowdlify-journal/4.png)
+![The current Crowdlify product interface](../../assets/blog/crowdlify-journal/4.png)
 
 ## **What Crowdlify Is Today**
 

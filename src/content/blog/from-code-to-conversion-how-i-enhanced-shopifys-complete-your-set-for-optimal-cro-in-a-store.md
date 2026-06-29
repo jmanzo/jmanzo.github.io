@@ -1,6 +1,6 @@
 ---
 title: "From Code to Conversion: How I Enhanced Shopify’s ‘Complete Your Set’ for Optimal CRO in a Store"
-description: "Have you ever stumbled upon a product recommendation on an e-commerce site that felt like it was reading your mind? That’s not magic. Recently, I worked on a Conversion Rate Optimization assignment…"
+description: "How I rebuilt Shopify's 'Complete Your Set' feature for a CRO experiment: smarter recommendation logic and a cleaner UI to lift average order value."
 pubDate: 2024-08-04
 updatedDate: 2025-07-07
 tags: ["cro", "case-study", "shopify"]
@@ -15,7 +15,7 @@ Have you ever stumbled upon a product recommendation on an e-commerce site that 
 
 My task was to rework this feature to make it smarter, more intuitive, and visually appealing.
 
-![](../../assets/blog/from-code-to-conversion-how-i-enhanced-shopifys-complete-your-set-for-optimal-cro-in-a-store/166bb29f-a4b7-43b0-9ce1-37bb758c6e7b_872x1212.jpg)
+![The original Shopify 'Complete Your Set' feature before optimization](../../assets/blog/from-code-to-conversion-how-i-enhanced-shopifys-complete-your-set-for-optimal-cro-in-a-store/166bb29f-a4b7-43b0-9ce1-37bb758c6e7b_872x1212.jpg)
 
 ### The Development Process
 
@@ -45,13 +45,13 @@ There is some additional CSS code that was added to it, but I won’t share it h
 
 To get this done, I added 1 more metafield for Products in the Shopify Admin panel. You would find this going through _**Products → Your product → Metafields**_ section at the bottom, or you can _**Settings → Custom data → Products**_. The metafield was called `dtc.upsells_v4`:
 
-![](../../assets/blog/from-code-to-conversion-how-i-enhanced-shopifys-complete-your-set-for-optimal-cro-in-a-store/9db73610-b0f9-4b02-b6be-50e15b249ae6_1440x1516.png)
+![Redesigned 'Complete Your Set' recommendation UI](../../assets/blog/from-code-to-conversion-how-i-enhanced-shopifys-complete-your-set-for-optimal-cro-in-a-store/9db73610-b0f9-4b02-b6be-50e15b249ae6_1440x1516.png)
 
 Metafields definition panel inside the Shopify Admin.
 
 _This metafield contains a List of products that the user can set in the Shopify Product Panel:_
 
-![](../../assets/blog/from-code-to-conversion-how-i-enhanced-shopifys-complete-your-set-for-optimal-cro-in-a-store/4ac96444-d7c2-4bee-849f-a74d021a198d_1326x1252.png)
+![The optimized 'Complete Your Set' layout on the product page](../../assets/blog/from-code-to-conversion-how-i-enhanced-shopifys-complete-your-set-for-optimal-cro-in-a-store/4ac96444-d7c2-4bee-849f-a74d021a198d_1326x1252.png)
 
 Product screenshot at the metafields section.
 
@@ -79,6 +79,6 @@ span.price-item.price-item--compare.js-upsell-compare-price {
 
 The results were clear—the new feature significantly increased the average order value and user engagement. Final prototype result:
 
-![](../../assets/blog/from-code-to-conversion-how-i-enhanced-shopifys-complete-your-set-for-optimal-cro-in-a-store/f1f824c0-1262-46a3-afce-39c9b9acfdec_1290x1938.jpg)
+![The 'Complete Your Set' experiment shown on mobile](../../assets/blog/from-code-to-conversion-how-i-enhanced-shopifys-complete-your-set-for-optimal-cro-in-a-store/f1f824c0-1262-46a3-afce-39c9b9acfdec_1290x1938.jpg)
 
 The final prototype result was developed with dynamic price calculation based on variant selection.

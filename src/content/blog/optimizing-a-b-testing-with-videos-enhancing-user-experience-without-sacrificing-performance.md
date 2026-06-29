@@ -1,6 +1,6 @@
 ---
 title: "Optimizing A/B Testing with Videos: Enhancing User Experience without Sacrificing Performance"
-description: "Incorporating videos into your website can significantly boost user engagement and conversion rates. However, improper implementation can lead to increased load times and a poor user experience. Th…"
+description: "Best practices for A/B testing with video on Shopify: lazy loading, HTML5 setup, and tooling that boosts engagement without hurting page load performance."
 pubDate: 2024-08-22
 updatedDate: 2025-07-08
 tags: ["cro", "case-study", "shopify"]
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function () {
 -   **Intersection Observer API:** Detects when the video enters the viewport and then loads it, providing precise control over loading behavior. Also, you can use this just like Netflix or another streaming service to play the video only when visible. I built something similar a few months ago.
 -   **Threshold Setting:** Adjusts when the video starts loading based on how much of it is visible in the viewport.
 
-![](../../assets/blog/optimizing-a-b-testing-with-videos-enhancing-user-experience-without-sacrificing-performance/1724358130857.png)
+![Convert.com A/B testing dashboard for a video experiment](../../assets/blog/optimizing-a-b-testing-with-videos-enhancing-user-experience-without-sacrificing-performance/1724358130857.png)
 
 ## Recommended Tools for Efficient A/B Testing with Videos
 

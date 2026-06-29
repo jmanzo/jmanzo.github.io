@@ -1,11 +1,13 @@
 ---
-title: "12 Key Ecommerce Principles I’m exploring in Tanner Larson’s book Ecommerce Evolved. Highly recommended!"
-description: "Running an ecommerce business is exciting, but it also comes with constant challenges. In his book Ecommerce Evolved, Tanner Larson shares 12 fundamental principles that have transformed how I appr…"
+title: "12 Ecommerce Principles from Tanner Larson's Ecommerce Evolved"
+description: "Twelve core principles from Tanner Larson's Ecommerce Evolved that changed how I build and optimize Shopify stores, summarized with practical takeaways."
 pubDate: 2024-09-09
 updatedDate: 2025-07-08
 tags: ["ecommerce", "shopify"]
 ---
 Running an ecommerce business is exciting, but it also comes with constant challenges. In his book _Ecommerce Evolved_, Tanner Larson shares 12 fundamental principles that have transformed how I approach and manage online stores. Here’s a practical summary:
+
+## The 12 principles
 
 1.  **Your business is not unique**: Even if you offer innovative products, the market is full of competition. What will set you apart is how you connect with your customers.
 2.  **Your business is marketing**: You’re not just selling products; you’re selling experiences and solutions to your customers’ problems. Without marketing, there are no sales.
@@ -26,6 +28,6 @@ b) Increase the average order value,
 
 c) Increase purchase frequency.
 
-These principles have helped me improve how I manage online stores for clients who need development and optimization services. I’m sure they’ll be useful to you as well if you implement even one of them in your business. I’m committed to applying these principles to my own checklist to help increase sales.
+These principles have helped me improve how I manage online stores for clients who need development and optimization services. Several of them show up directly in my [CRO work with Web Components on Shopify](/blog/how-web-components-enhance-cro-development-for-shopify-stores/). I’m sure they’ll be useful to you as well if you implement even one of them in your business. I’m committed to applying these principles to my own checklist to help increase sales.
 
 Which of these principles do you think will help you grow the most?

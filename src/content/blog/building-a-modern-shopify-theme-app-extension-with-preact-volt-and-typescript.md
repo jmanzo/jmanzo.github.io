@@ -1,10 +1,10 @@
 ---
 title: "Building a Modern Shopify Theme App Extension with Preact, Volt, and TypeScript"
-description: "Building Shopify theme app extensions with just Liquid can become messy and heavy quickly, especially when you want a slick, interactive UI, or when the 10MB Shopify size limit for deployed extensi…"
+description: "How I built a fast, maintainable Shopify theme app extension with Preact, Volt, and TypeScript while staying under the 10MB deployed-extension size limit."
 pubDate: 2025-07-11
 tags: ["ai", "case-study", "shopify"]
 ---
-[![](../../assets/blog/building-a-modern-shopify-theme-app-extension-with-preact-volt-and-typescript/Nuflorist-The-Flower-Shop-App.png)](https://apps.shopify.com/nuflorist)
+[![The Nuflorist flower shop app on the Shopify App Store](../../assets/blog/building-a-modern-shopify-theme-app-extension-with-preact-volt-and-typescript/Nuflorist-The-Flower-Shop-App.png)](https://apps.shopify.com/nuflorist)
 
 Building Shopify theme app extensions with just Liquid can become messy and heavy quickly, especially when you want a slick, interactive UI, or when the [10MB Shopify size limit for deployed extensions](https://shopify.dev/docs/apps/build/online-store/theme-app-extensions/configuration#file-and-content-size-limits) is a priority in your case.
 

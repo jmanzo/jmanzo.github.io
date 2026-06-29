@@ -1,6 +1,6 @@
 ---
 title: "How I built the Zone Details form for Nuflorist"
-description: "This journal documents a reproducible, phase-driven method I used to design and implement a complex feature, the Zone Details form for the Nuflorist Shopify app, using Cursor as my AI pair-programm…"
+description: "A phase-driven, auditable workflow for building a complex Shopify feature, the Nuflorist delivery-zone form, with Cursor as an AI pair-programmer."
 pubDate: 2025-09-19
 tags: ["ai", "journal", "case-study", "shopify"]
 ---
@@ -22,11 +22,11 @@ The assignment was straightforward in its Acceptance Criteria:
 -   Allow duplication and deletion,
 -   Handle pricing overrides with free delivery options.
 
-![](../../assets/blog/how-i-built-the-zone-details-form-for-nuflorist/Screenshot-2025-09-18-at-3.24.49-PM.png)
+![The Zone Details form for the Nuflorist Shopify app](../../assets/blog/how-i-built-the-zone-details-form-for-nuflorist/Screenshot-2025-09-18-at-3.24.49-PM.png)
 
-![](../../assets/blog/how-i-built-the-zone-details-form-for-nuflorist/Screenshot-2025-09-18-at-3.24.31-PM.png)
+![Zone Details form fields for creating and editing delivery zones](../../assets/blog/how-i-built-the-zone-details-form-for-nuflorist/Screenshot-2025-09-18-at-3.24.31-PM.png)
 
-![](../../assets/blog/how-i-built-the-zone-details-form-for-nuflorist/Screenshot-2025-09-18-at-3.24.21-PM.png)
+![Delivery zone list view in the Nuflorist app](../../assets/blog/how-i-built-the-zone-details-form-for-nuflorist/Screenshot-2025-09-18-at-3.24.21-PM.png)
 
 In practice, this required careful integration with an existing Remix-based Shopify app, following strict standards so the new code wouldn’t “break the vibe” of the project.
 
@@ -40,13 +40,13 @@ Here’s a look inside:
 
 Each chat has a name like `plan`\-feature/zone-details-form or dev-`feature/zone-details-form`. This keeps context light, organized, and easy to revisit.
 
-![](../../assets/blog/how-i-built-the-zone-details-form-for-nuflorist/Screenshot-2025-09-19-at-11.01.07-AM.png)
+![Named Cursor chats organized per feature](../../assets/blog/how-i-built-the-zone-details-form-for-nuflorist/Screenshot-2025-09-19-at-11.01.07-AM.png)
 
 ### 2\. Centralized context.
 
 Every assignment gets its own `.cursor/context/` folder with the `request.md` brief, images (Figma or screenshots), and acceptance criteria. This becomes the “single source of truth” for me and the AI.
 
-![](../../assets/blog/how-i-built-the-zone-details-form-for-nuflorist/Screenshot-at-Sep-19-11-03-09.png)
+![The .cursor/context folder used as a single source of truth](../../assets/blog/how-i-built-the-zone-details-form-for-nuflorist/Screenshot-at-Sep-19-11-03-09.png)
 
 ### 3\. Rules-first, code-second
 
@@ -54,13 +54,13 @@ I make the model analyze existing code first, then generate _rules_ to follow. T
 
 ### 4\. Small, readable phase files
 
-Every plan or dev step fits in a markdown file you can read in 1-2 minutes. This is key: it keeps complexity manageable and makes code reviews painless. I’ve already spoken about some of that [advice here](https://jeanmanzo.com/cursor-ai-shopify-whats-worked-for-me-and-hasnt/).
+Every plan or dev step fits in a markdown file you can read in 1-2 minutes. This is key: it keeps complexity manageable and makes code reviews painless. I’ve already spoken about some of that in [my Cursor and Shopify workflow](/blog/cursor-ai-shopify-whats-worked-for-me-and-hasnt/).
 
 ### 5\. Token discipline
 
 I never let a chat exceed ~70% of its token context. If it does, I start a new one. This avoids erratic model behavior (and runaway costs).
 
-![](../../assets/blog/how-i-built-the-zone-details-form-for-nuflorist/Screenshot-at-Sep-19-11-06-52.png)
+![Monitoring Cursor token context usage during development](../../assets/blog/how-i-built-the-zone-details-form-for-nuflorist/Screenshot-at-Sep-19-11-06-52.png)
 
 ### 6\. Step-by-step execution, always human-approved
 
