@@ -6,7 +6,7 @@ tags: ["ai", "case-study", "supabase", "nextjs"]
 draft: false
 ---
 
-On June 24, 2026, an earthquake doublet (magnitude 7.2 and 7.5) hit Yaracuy and Carabobo, Venezuela. Within days, collection centers opened everywhere, and the classic aid mismatch followed: one center drowning in bottled water it couldn't store while another ran out of gauze and baby formula. Nobody had a shared view of what each center actually needed.
+On June 24, 2026, an earthquake doublet (magnitude 7.2 and 7.5) struck north-central Venezuela. Its epicenter was in the states of Yaracuy and Carabobo, but the heaviest damage landed in the cities: Valencia, Maracay, Caracas, and La Guaira. Within days, collection centers opened everywhere, and the classic aid mismatch followed: one center drowning in bottled water it couldn't store while another ran out of gauze and baby formula. Nobody had a shared view of what each center actually needed.
 
 I decided to build that view. This is what shipped, what broke, and what working with AI agents on a real deadline actually looks like.
 
