@@ -6,7 +6,7 @@ export const SITE = {
   url: "https://jmanzo.github.io",
 } as const;
 
-export const SOCIAL_ICONS = ["github", "linkedin", "upwork", "x"] as const;
+export const SOCIAL_ICONS = ["github", "linkedin", "x"] as const;
 export type SocialIconName = (typeof SOCIAL_ICONS)[number];
 
 export const SOCIALS: ReadonlyArray<{
@@ -19,11 +19,6 @@ export const SOCIALS: ReadonlyArray<{
     label: "LinkedIn",
     href: "https://linkedin.com/in/jdevmanzo",
     icon: "linkedin",
-  },
-  {
-    label: "Upwork",
-    href: "https://upwork.com/freelancers/jdevmanzo",
-    icon: "upwork",
   },
   { label: "X", href: "https://x.com/jdevmanzo", icon: "x" },
 ];
