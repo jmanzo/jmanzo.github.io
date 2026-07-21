@@ -1,6 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
 import { getCollection, render } from "astro:content";
+import { Image, getImage } from "astro:assets";
 import { SITE } from "../../consts";
 
 export async function getStaticPaths() {
@@ -17,6 +18,16 @@ const date = post.data.pubDate.toLocaleDateString("en-US", {
 });
 
 const postUrl = new URL(`/blog/${post.id}/`, Astro.site).toString();
+
+// Social cards want a modest, widely-supported raster, not the full-size source.
+const ogImage = post.data.heroImage
+  ? await getImage({
+      src: post.data.heroImage,
+      width: 1200,
+      format: "jpeg",
+    })
+  : undefined;
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
@@ -38,6 +49,9 @@ const jsonLd = {
   },
   mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
   url: postUrl,
+  ...(ogImage && {
+    image: new URL(ogImage.src, Astro.site).toString(),
+  }),
   ...(post.data.tags && { keywords: post.data.tags.join(", ") }),
 };
 ---
@@ -46,6 +60,8 @@ const jsonLd = {
   title={post.data.title}
   description={post.data.description}
   ogType="article"
+  ogImage={ogImage?.src}
+  ogImageAlt={post.data.heroImageAlt}
 >
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <article class="max-w-2xl mx-auto px-6 pt-16 pb-16">
@@ -75,6 +91,18 @@ const jsonLd = {
         )
       }
     </p>
+    {
+      post.data.heroImage && (
+        <Image
+          src={post.data.heroImage}
+          alt={post.data.heroImageAlt ?? ""}
+          widths={[480, 800, 1200]}
+          sizes="(min-width: 768px) 42rem, 100vw"
+          loading="eager"
+          class="w-full h-auto rounded-lg mb-10"
+        />
+      )
+    }
     <div class="prose-body">
       <Content />
     </div>

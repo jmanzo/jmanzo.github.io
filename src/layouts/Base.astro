@@ -8,16 +8,23 @@ interface Props {
   title?: string;
   description?: string;
   ogType?: string;
+  ogImage?: string;
+  ogImageAlt?: string;
 }
 
 const {
   title,
   description = SITE.description,
   ogType = "website",
+  ogImage,
+  ogImageAlt,
 } = Astro.props;
 
 const fullTitle = title ? `${title} — ${SITE.author}` : SITE.title;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const ogImageUrl = ogImage
+  ? new URL(ogImage, Astro.site).toString()
+  : undefined;
 ---
 
 <!doctype html>
@@ -44,7 +51,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:site_name" content={SITE.title} />
+    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+    {ogImageAlt && <meta property="og:image:alt" content={ogImageAlt} />}
+    <meta
+      name="twitter:card"
+      content={ogImageUrl ? "summary_large_image" : "summary"}
+    />
 
     <link rel="preconnect" href="https://rsms.me/" />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
