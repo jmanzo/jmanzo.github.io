@@ -126,7 +126,7 @@ With boilerplate routes in Remix, I saved A LOT of time. But when I tried a comp
 
 * * *
 
-AI didn’t replace my developer judgment; actually, it made it more expensive to skip. The teams that win on Shopify will be the ones that use AI deliberately: small prompts, typed code, tight tests, and relentless version control.
+AI didn’t replace my developer judgment; actually, it made it more expensive to skip. I later inherited a theme that showed exactly what skipping it costs: [2,448 lines of AI-written code pasted into a single Liquid template](/blog/ai-generated-code-technical-debt/). The teams that win on Shopify will be the ones that use AI deliberately: small prompts, typed code, tight tests, and relentless version control.
 
 That’s the craft.
 
