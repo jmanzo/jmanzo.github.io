@@ -6,8 +6,9 @@
   --color-ink: #1a1a1a;
   --color-muted: #6b6b6b;
   --color-rule: #e7e5e4;
-  /* Primary brand */
-  --color-brand: #019add;
+  /* Primary brand — JDEVM declared blue (Pantone Blue C, R0 G130 B201).
+     Also clears 4.5:1 contrast on --color-bg, which #019add did not. */
+  --color-brand: #0082c9;
   --color-accent: var(--color-brand);
   --color-accent-soft: color-mix(in srgb, var(--color-brand) 14%, var(--color-bg));
 
@@ -30,7 +31,7 @@ body {
   line-height: 1.65;
 }
 
-a {
+a:not([class]) {
   color: var(--color-ink);
   text-decoration: underline;
   text-decoration-color: var(--color-rule);
@@ -38,7 +39,7 @@ a {
   transition: text-decoration-color 0.15s ease, color 0.15s ease;
 }
 
-a:hover {
+a:not([class]):hover {
   text-decoration-color: var(--color-accent);
   color: var(--color-accent);
 }

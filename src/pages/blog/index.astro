@@ -1,5 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
+import Cta from "../../components/Cta.astro";
 import { getCollection } from "astro:content";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
@@ -7,24 +8,31 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
 );
 ---
 
-<Base title="Blog">
+<Base
+  title="Writing"
+  description="Notes on Shopify, conversion, and shipping changes that move the number."
+>
   <section class="max-w-2xl mx-auto px-6 pt-16 pb-8">
     <p class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-3">
-      Blog
+      Writing
     </p>
     <h1
-      class="text-3xl sm:text-4xl font-semibold tracking-tight"
+      class="text-3xl sm:text-4xl font-semibold tracking-tight mb-4"
       style="font-family: var(--font-serif);"
     >
-      Notes & essays
+      Notes from inside the theme
     </h1>
+    <p class="text-[var(--color-muted)] leading-relaxed">
+      Shopify, conversion, and what actually happens when you ship a change to a
+      store that's taking orders.
+    </p>
   </section>
 
   <section class="max-w-2xl mx-auto px-6 pb-16">
     <ul class="divide-y divide-[var(--color-rule)]">
       {
         posts.map((post) => (
-          <li class="py-5 flex items-baseline justify-between gap-4">
+          <li class="py-5 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
             <a
               href={`/blog/${post.id}/`}
               class="no-underline hover:text-[var(--color-accent)] min-w-0"
@@ -36,7 +44,7 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
             </a>
             <time
               datetime={post.data.pubDate.toISOString()}
-              class="text-sm text-[var(--color-muted)] tabular-nums shrink-0"
+              class="order-first text-sm text-[var(--color-muted)] tabular-nums shrink-0 sm:order-0"
             >
               {post.data.pubDate.toLocaleDateString("en-US", {
                 year: "numeric",
@@ -48,4 +56,6 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
       }
     </ul>
   </section>
+
+  <Cta />
 </Base>

@@ -1,0 +1,63 @@
+---
+import { OFFER } from "../consts";
+
+interface Props {
+  /** Headline above the buttons. */
+  heading?: string;
+  /** Supporting line. Pass null to hide. */
+  body?: string | null;
+  /** Hide the secondary link (use on the audit page itself). */
+  showSecondary?: boolean;
+  class?: string;
+}
+
+const {
+  heading = "Want to know where your store is leaking?",
+  body = `The ${OFFER.name} takes ${OFFER.turnaround} and costs $${OFFER.price}. ${OFFER.guarantee}`,
+  showSecondary = true,
+  class: className = "",
+} = Astro.props;
+---
+
+<section
+  class:list={[
+    "max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]",
+    className,
+  ]}
+>
+  <div
+    class="rounded-lg border border-[var(--color-rule)] bg-[var(--color-surface)] p-6 sm:p-8"
+  >
+    <h2
+      class="text-xl sm:text-2xl font-semibold tracking-tight mb-3"
+      style="font-family: var(--font-serif);"
+    >
+      {heading}
+    </h2>
+    {
+      body && (
+        <p class="text-[var(--color-muted)] leading-relaxed mb-6">{body}</p>
+      )
+    }
+    <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
+      <a
+        href={OFFER.bookingUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="no-underline inline-flex items-center rounded-md bg-[var(--color-brand)] px-5 py-2.5 font-medium text-white hover:text-white hover:opacity-90 transition-opacity"
+      >
+        {OFFER.bookingLabel}
+      </a>
+      {
+        showSecondary && (
+          <a
+            href="/audit/"
+            class="text-sm text-muted underline decoration-rule underline-offset-3 hover:text-accent"
+          >
+            What's in the audit →
+          </a>
+        )
+      }
+    </div>
+  </div>
+</section>

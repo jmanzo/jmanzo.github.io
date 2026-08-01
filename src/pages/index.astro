@@ -1,7 +1,8 @@
 ---
 import Base from "../layouts/Base.astro";
+import Cta from "../components/Cta.astro";
 import { getCollection } from "astro:content";
-import { SOCIALS } from "../consts";
+import { SOCIALS, OFFER } from "../consts";
 import SocialIcon from "../components/SocialIcon.astro";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft))
@@ -19,22 +20,36 @@ const work = (await getCollection("work"))
       class="text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.1] mb-6"
       style="font-family: var(--font-serif);"
     >
-      Jean Manzo
+      I find where Shopify stores leak revenue — and I fix it.
     </h1>
-    <p class="text-lg text-[var(--color-ink)] leading-relaxed max-w-xl">
-      Full-stack developer with 10+ years of experience, specializing in
-      Shopify apps and themes that boost sales, automate operations, and keep
-      merchants happy.
+    <p class="text-lg text-[var(--color-ink)] leading-relaxed">
+      For DTC brands doing $50k–$500k a month. In {OFFER.turnaround} you get the
+      top ten leaks in your store, what each one costs you per year, and which to
+      fix first.
     </p>
-    <p class="mt-5 text-[var(--color-muted)]">
-      Currently working with <a
-        href="https://www.vaangroup.com"
-        class="text-[var(--color-ink)]"
+    <p class="mt-5 text-[var(--color-muted)] leading-relaxed">
+      14 years engineering, 6 of them inside Shopify — themes, apps, Plus,
+      headless.
+    </p>
+
+    <div class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
+      <a
+        href={OFFER.bookingUrl}
         target="_blank"
-        rel="noopener noreferrer">Vaangroup</a
-      > — a Shopify Plus agency.
-    </p>
-    <ul class="socials mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+        rel="noopener noreferrer"
+        class="no-underline inline-flex items-center rounded-md bg-[var(--color-brand)] px-5 py-2.5 font-medium text-white hover:text-white hover:opacity-90 transition-opacity"
+      >
+        {OFFER.bookingLabel}
+      </a>
+      <a
+        href="/audit/"
+        class="text-sm text-muted underline decoration-rule underline-offset-3 hover:text-accent"
+      >
+        What's in the audit →
+      </a>
+    </div>
+
+    <ul class="socials mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm">
       {
         SOCIALS.map((s) => (
           <li class="socials__item">
@@ -54,34 +69,59 @@ const work = (await getCollection("work"))
     </ul>
   </section>
 
+  <section
+    class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]"
+  >
+    <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-5">
+      Why me
+    </h2>
+    <p
+      class="text-lg leading-relaxed mb-4"
+      style="font-family: var(--font-serif);"
+    >
+      Most CRO consultants can't ship the fix. Most Shopify developers never
+      read the test.
+    </p>
+    <p class="text-[var(--color-muted)] leading-relaxed">
+      So the diagnosis goes to one vendor, the implementation to another, and
+      the thing that was supposed to lift conversion arrives three months later
+      built slightly wrong. I do both halves. The person who finds the leak is
+      the person who closes it — and the person who then checks whether the
+      number actually moved.
+    </p>
+  </section>
+
   {
     work.length > 0 && (
       <section class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]">
         <div class="flex items-baseline justify-between mb-6">
           <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)]">
-            Selected work
+            Conversion work
           </h2>
-          <a href="/work/" class="text-sm text-[var(--color-muted)]">
+          <a
+            href="/work/"
+            class="text-sm text-muted underline decoration-rule underline-offset-3 hover:text-accent"
+          >
             All →
           </a>
         </div>
         <ul class="space-y-4">
           {work.map((item) => (
-            <li class="flex items-baseline justify-between gap-4">
-              <div class="min-w-0">
+            <li>
+              <div class="flex items-baseline justify-between gap-4">
                 <a
                   href={item.data.url ?? `/work/${item.id}/`}
                   class="font-medium no-underline hover:text-[var(--color-accent)]"
                 >
                   {item.data.title}
                 </a>
-                <span class="text-[var(--color-muted)]">
-                  {" "}— {item.data.description}
+                <span class="text-sm text-[var(--color-muted)] tabular-nums shrink-0">
+                  {item.data.year}
                 </span>
               </div>
-              <span class="text-sm text-[var(--color-muted)] tabular-nums shrink-0">
-                {item.data.year}
-              </span>
+              <p class="mt-1 text-[var(--color-muted)] leading-relaxed">
+                {item.data.description}
+              </p>
             </li>
           ))}
         </ul>
@@ -96,7 +136,10 @@ const work = (await getCollection("work"))
           <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)]">
             Writing
           </h2>
-          <a href="/blog/" class="text-sm text-[var(--color-muted)]">
+          <a
+            href="/blog/"
+            class="text-sm text-muted underline decoration-rule underline-offset-3 hover:text-accent"
+          >
             All →
           </a>
         </div>
@@ -124,4 +167,6 @@ const work = (await getCollection("work"))
       </section>
     )
   }
+
+  <Cta />
 </Base>

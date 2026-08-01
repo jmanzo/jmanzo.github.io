@@ -1,5 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
+import Cta from "../../components/Cta.astro";
 import { getCollection } from "astro:content";
 
 const items = (await getCollection("work")).sort(
@@ -7,17 +8,24 @@ const items = (await getCollection("work")).sort(
 );
 ---
 
-<Base title="Work">
+<Base
+  title="Work"
+  description="Conversion work on Shopify DTC stores — changes designed, shipped, and measured by the same person."
+>
   <section class="max-w-2xl mx-auto px-6 pt-16 pb-8">
     <p class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-3">
       Work
     </p>
     <h1
-      class="text-3xl sm:text-4xl font-semibold tracking-tight"
+      class="text-3xl sm:text-4xl font-semibold tracking-tight mb-4"
       style="font-family: var(--font-serif);"
     >
-      Selected projects
+      Conversion work
     </h1>
+    <p class="text-[var(--color-muted)] leading-relaxed">
+      Changes I designed, shipped, and then measured — on stores that were
+      already taking real orders while I worked on them.
+    </p>
   </section>
 
   <section class="max-w-2xl mx-auto px-6 pb-16">
@@ -61,4 +69,6 @@ const items = (await getCollection("work")).sort(
       }
     </ul>
   </section>
+
+  <Cta heading="Your store has a version of these" />
 </Base>

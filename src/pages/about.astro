@@ -1,13 +1,34 @@
 ---
 import Base from "../layouts/Base.astro";
+import Cta from "../components/Cta.astro";
 
-const skills = [
-  "TypeScript",
-  "Remix",
-  "Prisma",
-  "Node.js",
-  "Shopify",
-  "PostgreSQL & MySQL",
+const capabilities = [
+  "Shopify themes (Liquid, OS 2.0, metafields)",
+  "Shopify Plus & checkout extensibility",
+  "Theme app extensions & embedded apps",
+  "Headless (Hydrogen, Storefront API)",
+  "A/B testing — design and read",
+  "GA4, GTM, Clarity",
+  "Core Web Vitals & page speed",
+];
+
+const principles = [
+  {
+    title: "Measure before touching anything",
+    body: "No baseline, no result. If we can't say what the number was before, we can't say the change worked.",
+  },
+  {
+    title: "Speed is the lowest-hanging fruit",
+    body: "There are almost always two seconds sitting on the floor of a Shopify store. Nobody has to be convinced that faster is better.",
+  },
+  {
+    title: "The apps are suspect number one",
+    body: "Eight to fifteen installed, half of them unused, all of them injecting scripts into every page load.",
+  },
+  {
+    title: "Never on the live theme",
+    body: "Duplicate, work, preview, publish. Your store keeps selling while I work on it.",
+  },
 ];
 
 const testimonials = [
@@ -32,41 +53,99 @@ const testimonials = [
 ];
 ---
 
-<Base title="About">
+<Base
+  title="About"
+  description="Jean Manzo — 14 years engineering, 6 inside Shopify. I find revenue leaks in DTC stores and I ship the fixes myself."
+>
   <section class="max-w-2xl mx-auto px-6 pt-16 pb-10">
-    <p
-      class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-3"
-    >
+    <p class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-3">
       About
     </p>
     <h1
       class="text-3xl sm:text-4xl font-semibold tracking-tight mb-6"
       style="font-family: var(--font-serif);"
     >
-      Building high-impact Shopify apps & themes
+      The engineer who reads the test and ships the fix
     </h1>
     <div class="space-y-5 text-[var(--color-ink)] leading-relaxed">
       <p>
-        I'm a full-stack developer with deep expertise in JavaScript,
-        TypeScript, and Shopify APIs. For over a decade I've helped merchants
-        and agencies ship reliable e-commerce experiences — from custom apps
-        and storefront themes to internal tooling and migrations.
+        I'm Jean Manzo. I've been building for the web for 14 years, the last
+        six of them inside Shopify — themes, custom apps, Plus builds, headless
+        storefronts, migrations. Somewhere in there I stopped caring about the
+        code and started caring about the number it was supposed to move.
       </p>
       <p>
-        I value deep work, simple architectures, and code that stays out of the
-        way. Most of my projects sit at the intersection of automation,
-        merchant UX, and conversion.
+        That turned out to be an unusual place to stand. The CRO people write
+        the strategy and hand the implementation to someone else. The developers
+        build the ticket and never find out whether it converted. Both halves
+        get done, badly, by people who can't check each other's work.
+      </p>
+      <p>
+        I do the diagnosis and the implementation. That means when I tell you a
+        leak is worth fixing, I already know what it takes to fix it — and when
+        I ship it, I know how we'll tell whether it worked.
       </p>
     </div>
   </section>
 
-  <section class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]">
+  <section
+    class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]"
+  >
+    <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-6">
+      How I work
+    </h2>
+    <ul class="space-y-6">
+      {
+        principles.map((p) => (
+          <li>
+            <h3 class="font-medium mb-1">{p.title}</h3>
+            <p class="text-[var(--color-muted)] leading-relaxed">{p.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section
+    class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]"
+  >
     <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-4">
-      Stack
+      Track record
+    </h2>
+    <p class="text-[var(--color-muted)] leading-relaxed mb-5">
+      Most of my independent work has run through Upwork, where the numbers are
+      public and I don't get to edit them:
+    </p>
+    <dl class="grid grid-cols-3 gap-4 mb-5">
+      <div>
+        <dt class="text-2xl font-semibold tabular-nums">$100K+</dt>
+        <dd class="text-sm text-[var(--color-muted)]">billed</dd>
+      </div>
+      <div>
+        <dt class="text-2xl font-semibold tabular-nums">84</dt>
+        <dd class="text-sm text-[var(--color-muted)]">contracts</dd>
+      </div>
+      <div>
+        <dt class="text-2xl font-semibold tabular-nums">100%</dt>
+        <dd class="text-sm text-[var(--color-muted)]">job success</dd>
+      </div>
+    </dl>
+    <p class="text-sm text-[var(--color-muted)] leading-relaxed">
+      These say one thing only: I finish what I start and clients don't regret
+      hiring me. They say nothing about your conversion rate — that's what the
+      audit is for.
+    </p>
+  </section>
+
+  <section
+    class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]"
+  >
+    <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-4">
+      What I work in
     </h2>
     <ul class="flex flex-wrap gap-2">
       {
-        skills.map((s) => (
+        capabilities.map((s) => (
           <li class="text-sm border border-[var(--color-rule)] rounded-full px-3 py-1 bg-[var(--color-surface)]">
             {s}
           </li>
@@ -75,7 +154,9 @@ const testimonials = [
     </ul>
   </section>
 
-  <section class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]">
+  <section
+    class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]"
+  >
     <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-6">
       What clients say
     </h2>
@@ -97,4 +178,9 @@ const testimonials = [
       }
     </ul>
   </section>
+
+  <Cta
+    heading="Start with the audit"
+    body="Thirty minutes on a call, then 72 hours to a ranked list of what your store is losing and where."
+  />
 </Base>

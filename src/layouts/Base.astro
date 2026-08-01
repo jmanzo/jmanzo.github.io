@@ -2,7 +2,7 @@
 import "../styles/global.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import { SITE } from "../consts";
+import { SITE, OFFER, SOCIALS } from "../consts";
 
 interface Props {
   title?: string;
@@ -25,6 +25,50 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 const ogImageUrl = ogImage
   ? new URL(ogImage, Astro.site).toString()
   : undefined;
+
+// Sitewide identity + offer. Lets AI answer engines and search parse who this
+// is, what is sold, and for how much, without reading the copy.
+const siteJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": `${SITE.url}/#person`,
+      name: SITE.author,
+      url: SITE.url,
+      jobTitle: "Shopify CRO engineer",
+      description:
+        "Finds and fixes revenue leaks in Shopify stores doing $50k–$500k/month. 14 years engineering, 6 in Shopify.",
+      knowsAbout: [
+        "Conversion rate optimization",
+        "Shopify",
+        "Shopify Plus",
+        "Liquid",
+        "A/B testing",
+        "Core Web Vitals",
+        "Ecommerce analytics",
+      ],
+      sameAs: SOCIALS.map((s) => s.href),
+    },
+    {
+      "@type": "ProfessionalService",
+      "@id": `${SITE.url}/#service`,
+      name: `${SITE.author} — Shopify CRO`,
+      url: SITE.url,
+      founder: { "@id": `${SITE.url}/#person` },
+      areaServed: "Worldwide",
+      serviceType: "Conversion rate optimization for Shopify stores",
+      makesOffer: {
+        "@type": "Offer",
+        name: OFFER.name,
+        description: OFFER.promise,
+        price: String(OFFER.price),
+        priceCurrency: OFFER.currency,
+        url: `${SITE.url}/audit/`,
+      },
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -32,7 +76,7 @@ const ogImageUrl = ogImage
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#019add" />
+    <meta name="theme-color" content="#0082c9" />
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
@@ -58,6 +102,9 @@ const ogImageUrl = ogImage
       name="twitter:card"
       content={ogImageUrl ? "summary_large_image" : "summary"}
     />
+    <meta name="twitter:creator" content="@jdevmanzo" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(siteJsonLd)} />
 
     <link rel="preconnect" href="https://rsms.me/" />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
