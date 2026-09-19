@@ -142,10 +142,6 @@ What ships with the build, from `public/`:
 
 Cloudflare turns on a setting by default that **prepends its own robots.txt**, blocking ClaudeBot, GPTBot, Google-Extended and others, which makes the site invisible to AI assistants. Change it under **Security Settings → Bot traffic → Manage your robots.txt** to **Content Signals Policy**, or to off.
 
-### Moving `jeanmanzo.com` over
+### Domains
 
-`jeanmanzo.com` is currently attached to the `cro-free-tier-lp` Worker. To cut over:
-
-1. Create the `jeanmanzo` Worker from this repo with the build settings above and check it on its `*.workers.dev` URL.
-2. Remove the custom domain from `cro-free-tier-lp` and add `jeanmanzo.com` (and `www`, if used) to `jeanmanzo`.
-3. Delete `.github/workflows/deploy.yml` and `public/.nojekyll`, and turn off GitHub Pages for this repo. Until then, pushes to `main` also publish to <https://jmanzo.github.io>, whose canonical URLs already point at `jeanmanzo.com`.
+`jeanmanzo.com` and `www.jeanmanzo.com` are Custom Domains on the `jeanmanzo` Worker. In the `jeanmanzo.com` zone, **Always Use HTTPS** is on and a Redirect Rule sends `www` to the root with a 301. Every push to `main` builds and deploys automatically; the preview URL is `jeanmanzo.jean-manzo.workers.dev`.
