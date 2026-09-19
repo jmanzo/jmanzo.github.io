@@ -1,11 +1,14 @@
 # jeanmanzo.com
 
-Personal site of [Jean Manzo](https://jeanmanzo.com) — a content-first portfolio and blog migrated from WordPress to [Astro](https://astro.build/) and deployed to GitHub Pages.
+Personal site of [Jean Manzo](https://jeanmanzo.com), senior developer: portfolio, writing and contact. Built with [Astro](https://astro.build/) and served from Cloudflare.
+
+The visual design comes from the retired `cro-free-tier-lp` landing: same tokens, type and components, extended to a multi-page site.
 
 ## Stack
 
 - [Astro 6](https://astro.build/) (static output) with [MDX](https://mdxjs.com/) and [`@astrojs/sitemap`](https://docs.astro.build/en/guides/integrations-guide/sitemap/)
-- [Tailwind CSS 4](https://tailwindcss.com/) via the official Vite plugin
+- Plain CSS with design tokens in `src/styles/global.css`. No CSS framework.
+- Montserrat (display), Roboto (body) and IBM Plex Mono (labels, code) from Google Fonts
 - [Sharp](https://sharp.pixelplumbing.com/) powers Astro's image service (WebP/AVIF, responsive variants)
 - Type-safe content collections (`blog`, `work`) defined in `src/content.config.ts`
 - pnpm + Node `>=22.12.0` (see `.nvmrc`)
@@ -27,25 +30,27 @@ All commands run from the project root.
 
 ```text
 .
-├── public/                 # Static assets served as-is (favicon, etc.)
+├── public/                 # Served as-is: favicon, og.png, robots.txt, _headers, _redirects
 ├── scripts/
 │   └── migrate-wp.mjs      # WordPress → Markdown migration (idempotent)
 ├── src/
 │   ├── assets/
 │   │   └── blog/<slug>/    # Post images, optimized at build time by Astro
-│   ├── components/         # Astro components (Header, Footer, SocialIcon, ...)
+│   ├── components/         # Header, Footer, Section, PageHead, WorkEntry, Closer, SocialIcon
 │   ├── content/
 │   │   ├── blog/           # Blog posts (Markdown / MDX)
 │   │   └── work/           # Work entries (Markdown / MDX)
 │   ├── content.config.ts   # Zod schemas for both collections
-│   ├── consts.ts           # SITE / SOCIALS / NAV constants
+│   ├── consts.ts           # SITE / CAREER / CONTACT / SOCIALS / NAV constants
 │   ├── layouts/Base.astro  # Shared HTML shell, head meta, fonts
 │   ├── pages/              # File-based routes
 │   │   ├── blog/[...slug].astro
 │   │   ├── work/[...slug].astro
 │   │   ├── rss.xml.ts
 │   │   └── ...
-│   └── styles/global.css   # Tailwind theme tokens + small BEM rules
+│   └── styles/global.css   # Design tokens, components, article prose
+├── scripts/og-image.html   # Source of public/og.png (open it, click download)
+├── wrangler.jsonc          # Cloudflare static-assets Worker config
 ├── astro.config.mjs
 ├── package.json
 └── tsconfig.json
@@ -53,8 +58,12 @@ All commands run from the project root.
 
 ## Conventions
 
-- **Brand color**: `#019add` is exposed as `--color-brand` in `src/styles/global.css` and aliased to `--color-accent`. Always reference tokens via `var(--color-*)`, never hard-code colors in components.
-- **CSS**: BEM (`block__element--modifier`) for any custom rules; Tailwind utilities for everything else.
+- **Colors**: every color is a token on `:root` in `src/styles/global.css` (`--ground`, `--surface`, `--ink`, `--ink-2`, `--signal`, ...), redefined for dark mode under `prefers-color-scheme` and under `data-theme="dark"` / `data-theme="light"` on `<html>`. Components never hard-code colors. `--signal` is Pantone Blue C (`#0082c9`).
+- **Layout**: sections use the landing's split pattern (`Section.astro`: heading on the left rail, content on the right). Inner pages open with `PageHead.astro`; every page ends with `Closer.astro` (`#contact`), which is where the nav's "Get in touch" button jumps.
+- **Years of experience**: never typed by hand. `CAREER` in `src/consts.ts` holds the start years; `<Years since={...} />` renders the count at build time and a small script in `Base.astro` refreshes it in the browser, so it rolls over on January 1 without a deploy.
+- **External links** open in a new tab. In `.astro` files set `target="_blank" rel="noopener noreferrer"` by hand; Markdown/MDX content gets it automatically from `src/plugins/rehype-external-links.mjs`.
+- **Contact**: one real destination, `CONTACT.bookingUrl` in `src/consts.ts`. Every other contact CTA is an anchor to `#contact`.
+- **Copy**: US English. No em dashes or en dashes in site copy; ranges are written "2024 to 2025". Claims on the site must be ones you can back up.
 - **TypeScript**: no `as` assertions and no `any` — use union types, narrowing, and Zod schemas.
 - **Content collections**:
   - `blog` posts require `title`, `description`, `pubDate`; optional `updatedDate`, `tags`, `draft`.
@@ -116,4 +125,27 @@ pnpm migrate:wp
 
 ## Deployment
 
-Pushes to `main` trigger `.github/workflows/deploy.yml`, which runs `pnpm install --frozen-lockfile && pnpm run build` on Node 22 and publishes `./dist` to GitHub Pages. The site is served at <https://jmanzo.github.io> and proxied behind <https://jeanmanzo.com>.
+**Cloudflare**, as a static-assets Worker (the same setup the `cro-free-tier-lp` landing used). Configuration lives in `wrangler.jsonc`; there is no "Build output directory" field in the dashboard, that's Pages.
+
+In the Cloudflare dashboard, under **Settings → Build**:
+
+- Build command: `pnpm run build`
+- Deploy command: `npx wrangler deploy`
+- Root directory: empty (the repo root)
+
+What ships with the build, from `public/`:
+
+- `_headers`: security headers, plus immutable caching for the fingerprinted `/_astro/*` files.
+- `_redirects`: 301s from the retired CRO URLs (`/free-tier`, `/audit`) to the home page.
+- `robots.txt`: allows everyone and declares `Content-Signal: search=yes, ai-train=no, use=reference`.
+- `og.png`: the default link preview card. Regenerate it with `scripts/og-image.html`.
+
+Cloudflare turns on a setting by default that **prepends its own robots.txt**, blocking ClaudeBot, GPTBot, Google-Extended and others, which makes the site invisible to AI assistants. Change it under **Security Settings → Bot traffic → Manage your robots.txt** to **Content Signals Policy**, or to off.
+
+### Moving `jeanmanzo.com` over
+
+`jeanmanzo.com` is currently attached to the `cro-free-tier-lp` Worker. To cut over:
+
+1. Create the `jeanmanzo` Worker from this repo with the build settings above and check it on its `*.workers.dev` URL.
+2. Remove the custom domain from `cro-free-tier-lp` and add `jeanmanzo.com` (and `www`, if used) to `jeanmanzo`.
+3. Delete `.github/workflows/deploy.yml` and `public/.nojekyll`, and turn off GitHub Pages for this repo. Until then, pushes to `main` also publish to <https://jmanzo.github.io>, whose canonical URLs already point at `jeanmanzo.com`.

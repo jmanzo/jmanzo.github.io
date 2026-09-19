@@ -1,0 +1,16 @@
+---
+import { yearsSince } from "../consts";
+
+/**
+ * Years of experience since `since`. Rendered at build time so crawlers and
+ * no-JS visitors get a number, then refreshed in the browser by the script in
+ * Base.astro, so it rolls over on January 1 without a rebuild.
+ */
+interface Props {
+  since: number;
+}
+
+const { since } = Astro.props;
+---
+
+<span data-years-since={since}>{yearsSince(since)}</span>

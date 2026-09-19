@@ -1,16 +1,10 @@
 ---
 import Base from "../layouts/Base.astro";
-import Cta from "../components/Cta.astro";
-
-const capabilities = [
-  "Shopify themes (Liquid, OS 2.0, metafields)",
-  "Shopify Plus & checkout extensibility",
-  "Theme app extensions & embedded apps",
-  "Headless (Hydrogen, Storefront API)",
-  "A/B testing — design and read",
-  "GA4, GTM, Clarity",
-  "Core Web Vitals & page speed",
-];
+import PageHead from "../components/PageHead.astro";
+import Section from "../components/Section.astro";
+import Closer from "../components/Closer.astro";
+import Years from "../components/Years.astro";
+import { CAREER, SITE, yearsSince } from "../consts";
 
 const principles = [
   {
@@ -18,16 +12,43 @@ const principles = [
     body: "No baseline, no result. If we can't say what the number was before, we can't say the change worked.",
   },
   {
-    title: "Speed is the lowest-hanging fruit",
-    body: "There are almost always two seconds sitting on the floor of a Shopify store. Nobody has to be convinced that faster is better.",
-  },
-  {
-    title: "The apps are suspect number one",
-    body: "Eight to fifteen installed, half of them unused, all of them injecting scripts into every page load.",
-  },
-  {
     title: "Never on the live theme",
-    body: "Duplicate, work, preview, publish. Your store keeps selling while I work on it.",
+    body: "Duplicate, work, preview, publish. The store keeps selling while I work on it, and every change can be reverted.",
+  },
+  {
+    title: "Small diffs over big rewrites",
+    body: "The fix that survives review is usually the short one. I'd rather ship 80 lines I can defend than 2,000 I can't.",
+  },
+  {
+    title: "Written down",
+    body: "Decisions, tradeoffs and the parts that didn't work go into writing, so the next developer doesn't have to rediscover them.",
+  },
+];
+
+const stack = [
+  {
+    group: "Shopify",
+    items: [
+      "Liquid and Online Store 2.0",
+      "Theme app extensions",
+      "Shopify Plus and checkout extensibility",
+      "Admin and Storefront APIs",
+      "Headless with Hydrogen",
+    ],
+  },
+  {
+    group: "Apps and backend",
+    items: ["TypeScript", "Remix", "Node.js", "Prisma", "PostgreSQL and MySQL"],
+  },
+  {
+    group: "Frontend and delivery",
+    items: [
+      "Preact, Vite and Web Components",
+      "Core Web Vitals and page speed",
+      "A/B test builds (Convert, Intelligems)",
+      "GA4, GTM and Clarity",
+      "Claude Code and Cursor",
+    ],
   },
 ];
 
@@ -46,7 +67,7 @@ const testimonials = [
   },
   {
     quote:
-      "Knowledgeable and resourceful — looking forward to future projects together.",
+      "Knowledgeable and resourceful. Looking forward to future projects together.",
     name: "Enrique Ramirez",
     title: "CEO & Cofounder",
   },
@@ -55,132 +76,80 @@ const testimonials = [
 
 <Base
   title="About"
-  description="Jean Manzo — 14 years engineering, 6 inside Shopify. I find revenue leaks in DTC stores and I ship the fixes myself."
+  description={`${SITE.author}, ${SITE.role.toLowerCase()} in ${SITE.location}. ${yearsSince(CAREER.developerSince)} years building for the web, ${yearsSince(CAREER.shopifySince)} inside Shopify: apps, extensions, themes and Plus builds.`}
 >
-  <section class="max-w-2xl mx-auto px-6 pt-16 pb-10">
-    <p class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-3">
-      About
+  <PageHead
+    eyebrow={`About · ${SITE.location}`}
+    title="Senior developer, mostly inside Shopify."
+    lede="Apps, extensions, themes and the tooling around them, for merchants and the agencies that serve them."
+  />
+
+  <Section title="Background">
+    <p class="claim">
+      I care less about the code than about what it's supposed to do, and that turned out to be
+      the most useful thing I learned.
     </p>
-    <h1
-      class="text-3xl sm:text-4xl font-semibold tracking-tight mb-6"
-      style="font-family: var(--font-serif);"
-    >
-      The engineer who reads the test and ships the fix
-    </h1>
-    <div class="space-y-5 text-[var(--color-ink)] leading-relaxed">
-      <p>
-        I'm Jean Manzo. I've been building for the web for 14 years, the last
-        six of them inside Shopify — themes, custom apps, Plus builds, headless
-        storefronts, migrations. Somewhere in there I stopped caring about the
-        code and started caring about the number it was supposed to move.
-      </p>
-      <p>
-        That turned out to be an unusual place to stand. The CRO people write
-        the strategy and hand the implementation to someone else. The developers
-        build the ticket and never find out whether it converted. Both halves
-        get done, badly, by people who can't check each other's work.
-      </p>
-      <p>
-        I do the diagnosis and the implementation. That means when I tell you a
-        leak is worth fixing, I already know what it takes to fix it — and when
-        I ship it, I know how we'll tell whether it worked.
-      </p>
+    <p>
+      I'm Jean Manzo. I've been building for the web for <Years since={CAREER.developerSince} />
+      years, the last <Years since={CAREER.shopifySince} /> of them inside Shopify: themes, custom
+      apps, Plus builds, headless storefronts and migrations.
+    </p>
+    <p>
+      Most recently I worked at a Shopify Plus agency, until July 2026. Along the way I've
+      delivered 84 independent contracts for merchants and agencies, many of them for CRO teams
+      who needed experiments built exactly to spec and measured honestly.
+    </p>
+    <p>
+      I value deep work, simple architecture, and code that stays out of the way. I write about
+      what I build, including <a href="/blog/">the parts that went wrong</a>.
+    </p>
+  </Section>
+
+  <Section title="How I work">
+    <ol class="steps">
+      {
+        principles.map((p, i) => (
+          <li class="step">
+            <div class="step-n">{String(i + 1).padStart(2, "0")}</div>
+            <div>
+              <h3>{p.title}</h3>
+              <p>{p.body}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </Section>
+
+  <Section title="Stack">
+    <div class="fit">
+      {
+        stack.map((g) => (
+          <div>
+            <h3>{g.group}</h3>
+            <ul>
+              {g.items.map((s) => (
+                <li>{s}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
     </div>
-  </section>
+  </Section>
 
-  <section
-    class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]"
-  >
-    <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-6">
-      How I work
-    </h2>
-    <ul class="space-y-6">
-      {
-        principles.map((p) => (
-          <li>
-            <h3 class="font-medium mb-1">{p.title}</h3>
-            <p class="text-[var(--color-muted)] leading-relaxed">{p.body}</p>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
-
-  <section
-    class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]"
-  >
-    <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-4">
-      Track record
-    </h2>
-    <p class="text-[var(--color-muted)] leading-relaxed mb-5">
-      Most of my independent work has run through Upwork, where the numbers are
-      public and I don't get to edit them:
-    </p>
-    <dl class="grid grid-cols-3 gap-4 mb-5">
-      <div>
-        <dt class="text-2xl font-semibold tabular-nums">$100K+</dt>
-        <dd class="text-sm text-[var(--color-muted)]">billed</dd>
-      </div>
-      <div>
-        <dt class="text-2xl font-semibold tabular-nums">84</dt>
-        <dd class="text-sm text-[var(--color-muted)]">contracts</dd>
-      </div>
-      <div>
-        <dt class="text-2xl font-semibold tabular-nums">100%</dt>
-        <dd class="text-sm text-[var(--color-muted)]">job success</dd>
-      </div>
-    </dl>
-    <p class="text-sm text-[var(--color-muted)] leading-relaxed">
-      These say one thing only: I finish what I start and clients don't regret
-      hiring me. They say nothing about your conversion rate — that's what the
-      audit is for.
-    </p>
-  </section>
-
-  <section
-    class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]"
-  >
-    <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-4">
-      What I work in
-    </h2>
-    <ul class="flex flex-wrap gap-2">
-      {
-        capabilities.map((s) => (
-          <li class="text-sm border border-[var(--color-rule)] rounded-full px-3 py-1 bg-[var(--color-surface)]">
-            {s}
-          </li>
-        ))
-      }
-    </ul>
-  </section>
-
-  <section
-    class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]"
-  >
-    <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-6">
-      What clients say
-    </h2>
-    <ul class="space-y-8">
+  <Section title="What clients say">
+    <ul class="quotes">
       {
         testimonials.map((t) => (
           <li>
-            <p
-              class="text-[var(--color-ink)] leading-relaxed"
-              style="font-family: var(--font-serif);"
-            >
-              "{t.quote}"
-            </p>
-            <p class="mt-3 text-sm text-[var(--color-muted)]">
-              {t.name} · {t.title}
-            </p>
+            <blockquote>“{t.quote}”</blockquote>
+            <p class="lab who">{t.name} · {t.title}</p>
           </li>
         ))
       }
     </ul>
-  </section>
+  </Section>
 
-  <Cta
-    heading="Start with the audit"
-    body="Thirty minutes on a call, then 72 hours to a ranked list of what your store is losing and where."
-  />
+  <Closer />
 </Base>

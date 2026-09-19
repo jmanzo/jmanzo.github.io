@@ -1,27 +1,18 @@
 ---
+/** The landing's split section: heading on the left rail, content on the right. */
 interface Props {
-  title?: string;
-  eyebrow?: string;
-  class?: string;
+  title: string;
+  id?: string;
 }
 
-const { title, eyebrow, class: className = "" } = Astro.props;
+const { title, id } = Astro.props;
 ---
 
-<section class:list={["max-w-2xl mx-auto px-6 py-12", className]}>
-  {
-    eyebrow && (
-      <p class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-2">
-        {eyebrow}
-      </p>
-    )
-  }
-  {
-    title && (
-      <h2 class="text-2xl font-semibold tracking-tight mb-6 font-[var(--font-serif)]">
-        {title}
-      </h2>
-    )
-  }
-  <slot />
+<section id={id}>
+  <div class="wrap sec split">
+    <h2>{title}</h2>
+    <div class="col">
+      <slot />
+    </div>
+  </div>
 </section>

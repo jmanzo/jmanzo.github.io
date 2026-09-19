@@ -2,7 +2,7 @@
 import "../styles/global.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import { SITE, OFFER, SOCIALS } from "../consts";
+import { SITE, SOCIALS } from "../consts";
 
 interface Props {
   title?: string;
@@ -16,56 +16,56 @@ const {
   title,
   description = SITE.description,
   ogType = "website",
-  ogImage,
-  ogImageAlt,
+  ogImage = "/og.png",
+  ogImageAlt = `${SITE.author}, ${SITE.role}`,
 } = Astro.props;
 
-const fullTitle = title ? `${title} — ${SITE.author}` : SITE.title;
+const fullTitle = title
+  ? `${title} · ${SITE.author}`
+  : `${SITE.author} · ${SITE.role}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
-const ogImageUrl = ogImage
-  ? new URL(ogImage, Astro.site).toString()
-  : undefined;
+const ogImageUrl = new URL(ogImage, Astro.site).toString();
+const isDefaultOgImage = ogImage === "/og.png";
 
-// Sitewide identity + offer. Lets AI answer engines and search parse who this
-// is, what is sold, and for how much, without reading the copy.
+// Sitewide identity. Lets search and AI answer engines parse who this is and
+// what they work on without reading the copy.
 const siteJsonLd = {
   "@context": "https://schema.org",
   "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${SITE.url}/#website`,
+      name: SITE.title,
+      url: SITE.url,
+      publisher: { "@id": `${SITE.url}/#person` },
+    },
     {
       "@type": "Person",
       "@id": `${SITE.url}/#person`,
       name: SITE.author,
       url: SITE.url,
-      jobTitle: "Shopify CRO engineer",
-      description:
-        "Finds and fixes revenue leaks in Shopify stores doing $50k–$500k/month. 14 years engineering, 6 in Shopify.",
+      jobTitle: SITE.role,
+      description: SITE.description,
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Medellín",
+        addressCountry: "CO",
+      },
       knowsAbout: [
-        "Conversion rate optimization",
         "Shopify",
         "Shopify Plus",
+        "Shopify app development",
+        "Theme app extensions",
         "Liquid",
-        "A/B testing",
-        "Core Web Vitals",
-        "Ecommerce analytics",
+        "TypeScript",
+        "Remix",
+        "Node.js",
+        "Prisma",
+        "Web performance",
+        "A/B testing implementation",
+        "AI-assisted software development",
       ],
       sameAs: SOCIALS.map((s) => s.href),
-    },
-    {
-      "@type": "ProfessionalService",
-      "@id": `${SITE.url}/#service`,
-      name: `${SITE.author} — Shopify CRO`,
-      url: SITE.url,
-      founder: { "@id": `${SITE.url}/#person` },
-      areaServed: "Worldwide",
-      serviceType: "Conversion rate optimization for Shopify stores",
-      makesOffer: {
-        "@type": "Offer",
-        name: OFFER.name,
-        description: OFFER.promise,
-        price: String(OFFER.price),
-        priceCurrency: OFFER.currency,
-        url: `${SITE.url}/audit/`,
-      },
     },
   ],
 };
@@ -76,7 +76,8 @@ const siteJsonLd = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0082c9" />
+    <meta name="theme-color" content="#f5f8fb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#080f16" media="(prefers-color-scheme: dark)" />
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
@@ -96,24 +97,40 @@ const siteJsonLd = {
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={SITE.title} />
-    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
-    {ogImageAlt && <meta property="og:image:alt" content={ogImageAlt} />}
-    <meta
-      name="twitter:card"
-      content={ogImageUrl ? "summary_large_image" : "summary"}
-    />
+    <meta property="og:image" content={ogImageUrl} />
+    {
+      isDefaultOgImage && (
+        <>
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+        </>
+      )
+    }
+    <meta property="og:image:alt" content={ogImageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:creator" content="@jdevmanzo" />
 
     <script type="application/ld+json" set:html={JSON.stringify(siteJsonLd)} />
+    <slot name="head" />
 
-    <link rel="preconnect" href="https://rsms.me/" />
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Roboto:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    />
   </head>
-  <body class="min-h-screen flex flex-col">
+  <body>
     <Header />
-    <main class="flex-1">
+    <main id="top">
       <slot />
     </main>
     <Footer />
+    <script is:inline>
+      // Keeps every <Years> count current between deploys.
+      document.querySelectorAll("[data-years-since]").forEach(function (el) {
+        el.textContent = String(new Date().getFullYear() - Number(el.dataset.yearsSince));
+      });
+    </script>
   </body>
 </html>

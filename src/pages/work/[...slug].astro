@@ -1,5 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
+import Closer from "../../components/Closer.astro";
 import { getCollection, render } from "astro:content";
 
 export async function getStaticPaths() {
@@ -14,21 +15,19 @@ const { Content } = await render(item);
 ---
 
 <Base title={item.data.title} description={item.data.description}>
-  <article class="max-w-2xl mx-auto px-6 pt-16 pb-16">
-    <p class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-3">
-      <a href="/work/" class="no-underline">Work</a> · {item.data.year}
-    </p>
-    <h1
-      class="text-3xl sm:text-4xl font-semibold tracking-tight mb-3"
-      style="font-family: var(--font-serif);"
-    >
-      {item.data.title}
-    </h1>
-    <p class="text-[var(--color-muted)] leading-relaxed mb-8">
-      {item.data.description}
-    </p>
-    <div class="prose-body">
+  <article class="wrap article">
+    <header class="article-head">
+      <div class="eyebrow">
+        <span class="dot"></span>
+        <span class="lab"><a href="/work/">Work</a> · {item.data.year}</span>
+      </div>
+      <h1>{item.data.title}</h1>
+      <p class="desc">{item.data.description}</p>
+    </header>
+    <div class="prose article-body">
       <Content />
     </div>
   </article>
+
+  <Closer />
 </Base>

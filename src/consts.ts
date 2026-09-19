@@ -1,24 +1,32 @@
+/**
+ * Career start years. Every "N years" on the site is derived from these, so
+ * the numbers never need editing by hand.
+ */
+export const CAREER = {
+  developerSince: 2012,
+  shopifySince: 2019,
+} as const;
+
+/** Whole years from `since` to today (to build time, when rendered statically). */
+export const yearsSince = (since: number) => new Date().getFullYear() - since;
+
+const devYears = yearsSince(CAREER.developerSince);
+const shopifyYears = yearsSince(CAREER.shopifySince);
+
 export const SITE = {
   title: "Jean Manzo",
-  description:
-    "I find where Shopify stores doing $50k–$500k/mo leak revenue — and I fix it. Revenue Leak Audit delivered in 72 hours.",
+  description: `Senior developer. ${devYears} years building for the web, ${shopifyYears} of them inside Shopify: custom apps, theme app extensions, Liquid themes and Plus builds.`,
   author: "Jean Manzo",
-  url: "https://jmanzo.github.io",
+  role: "Senior Developer",
+  location: "Medellín, Colombia",
+  url: "https://jeanmanzo.com",
 } as const;
 
 /**
- * Single source of truth for the offer on the site.
- * Prices mirror NEGOCIO.md. Never publish the $250 closing concession.
+ * The one real contact destination. Every other "Get in touch" on the site is
+ * an anchor jump to the closer block (#contact), which links here.
  */
-export const OFFER = {
-  name: "Revenue Leak Audit",
-  price: 500,
-  currency: "USD",
-  turnaround: "72 hours",
-  promise:
-    "I show you exactly where your store leaks money, what each leak is worth, and which one to fix first.",
-  guarantee:
-    "If the leaks I find don't add up to at least 5x what you paid me in projected annual revenue, you don't pay.",
+export const CONTACT = {
   bookingUrl: "https://calendly.com/jdevmanzo-1/30min",
   bookingLabel: "Book a 30-min call",
 } as const;
@@ -36,13 +44,29 @@ export const SOCIALS: ReadonlyArray<{
     href: "https://linkedin.com/in/jdevmanzo",
     icon: "linkedin",
   },
-  { label: "X", href: "https://x.com/jdevmanzo", icon: "x" },
   { label: "GitHub", href: "https://github.com/jmanzo", icon: "github" },
+  { label: "X", href: "https://x.com/jdevmanzo", icon: "x" },
 ];
 
 export const NAV = [
-  { label: "Audit", href: "/audit/" },
   { label: "Work", href: "/work/" },
   { label: "Writing", href: "/blog/" },
   { label: "About", href: "/about/" },
 ] as const;
+
+// Frontmatter dates are parsed as UTC midnight. Formatting them in the local
+// zone shifts every post back a day anywhere west of Greenwich.
+export const formatMonth = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+
+export const formatDay = (date: Date) =>
+  date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });

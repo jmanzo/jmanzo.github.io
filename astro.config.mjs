@@ -1,18 +1,18 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import tailwindcss from '@tailwindcss/vite';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+import rehypeExternalLinks from './src/plugins/rehype-external-links.mjs';
 
 export default defineConfig({
-  site: 'https://jmanzo.github.io',
-  vite: {
-    plugins: [tailwindcss()],
-  },
+  site: 'https://jeanmanzo.com',
   integrations: [mdx(), sitemap()],
   markdown: {
+    rehypePlugins: [[rehypeExternalLinks, { siteHost: 'jeanmanzo.com' }]],
     shikiConfig: {
-      theme: 'github-light',
+      // Both palettes are emitted as CSS variables; global.css swaps to the
+      // dark one alongside the rest of the theme tokens.
+      themes: { light: 'github-light', dark: 'github-dark' },
       wrap: true,
     },
   },

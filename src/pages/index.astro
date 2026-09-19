@@ -1,9 +1,11 @@
 ---
 import Base from "../layouts/Base.astro";
-import Cta from "../components/Cta.astro";
+import Section from "../components/Section.astro";
+import Closer from "../components/Closer.astro";
+import WorkEntry from "../components/WorkEntry.astro";
+import Years from "../components/Years.astro";
 import { getCollection } from "astro:content";
-import { SOCIALS, OFFER } from "../consts";
-import SocialIcon from "../components/SocialIcon.astro";
+import { CAREER, formatMonth } from "../consts";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
@@ -11,162 +13,112 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
 
 const work = (await getCollection("work"))
   .sort((a, b) => (b.data.order ?? 0) - (a.data.order ?? 0))
-  .slice(0, 4);
+  .slice(0, 3);
+
+const stats = [
+  { since: CAREER.developerSince, k: "Building for the web" },
+  { since: CAREER.shopifySince, k: "Inside Shopify" },
+  { v: "84", k: "Contracts delivered" },
+  { v: "100%", k: "Job success score" },
+];
 ---
 
 <Base>
-  <section class="max-w-2xl mx-auto px-6 pt-20 pb-12">
-    <h1
-      class="text-4xl sm:text-5xl font-semibold tracking-tight leading-[1.1] mb-6"
-      style="font-family: var(--font-serif);"
-    >
-      I find where Shopify stores leak revenue — and I fix it.
-    </h1>
-    <p class="text-lg text-[var(--color-ink)] leading-relaxed">
-      For DTC brands doing $50k–$500k a month. In {OFFER.turnaround} you get the
-      top ten leaks in your store, what each one costs you per year, and which to
-      fix first.
-    </p>
-    <p class="mt-5 text-[var(--color-muted)] leading-relaxed">
-      14 years engineering, 6 of them inside Shopify — themes, apps, Plus,
-      headless.
-    </p>
+  <div class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow">
+          <span class="dot"></span>
+          <span class="lab">Senior developer · Shopify, TypeScript, Node</span>
+        </div>
 
-    <div class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
-      <a
-        href={OFFER.bookingUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="no-underline inline-flex items-center rounded-md bg-[var(--color-brand)] px-5 py-2.5 font-medium text-white hover:text-white hover:opacity-90 transition-opacity"
-      >
-        {OFFER.bookingLabel}
-      </a>
-      <a
-        href="/audit/"
-        class="text-sm text-muted underline decoration-rule underline-offset-3 hover:text-accent"
-      >
-        What's in the audit →
-      </a>
+        <h1>I build Shopify apps and storefronts <em>that stay fast and stay shipped.</em></h1>
+
+        <p class="lede">
+          <Years since={CAREER.developerSince} /> years building for the web. The last
+          <Years since={CAREER.shopifySince} /> years inside Shopify.
+        </p>
+
+        <div class="select">
+          <b>Custom apps, theme app extensions and Liquid themes</b> for merchants and the
+          agencies that serve them, plus the experiments CRO teams need built to spec.
+        </div>
+
+        <div class="cta-row">
+          <a class="btn btn-a" href="#contact">Get in touch</a>
+          <a class="btn btn-b" href="/work/">See the work</a>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Selected work</h2>
+          <span class="lab">Case studies</span>
+        </div>
+        {work.map((item, i) => <WorkEntry item={item} index={i} />)}
+        <div class="panel-foot">
+          <span>Each one links to the full write-up.</span>
+          <a class="more" href="/work/">All work →</a>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <ul class="socials mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+  <Section title="What I do">
+    <p class="claim">
+      Senior work is mostly judgment: what to build, what to leave alone, and how to ship it
+      without breaking a store that's taking orders.
+    </p>
+    <p>
+      Most of my work lives inside Shopify. Remix and TypeScript apps with Prisma behind them,
+      theme app extensions built with Preact and Vite, Online Store 2.0 themes, and the Liquid
+      nobody else wants to touch.
+    </p>
+    <p>
+      I use AI tools every day, Claude Code and Cursor included, and I review what they write the
+      way I'd review any pull request. <a href="/blog/ai-generated-code-technical-debt/">The job is
+      still owning the diff.</a>
+    </p>
+  </Section>
+
+  <Section title="Track record">
+    <div class="stats">
       {
-        SOCIALS.map((s) => (
-          <li class="socials__item">
-            <a
-              class="socials__link no-underline inline-flex items-center gap-2"
-              href={s.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={s.label}
-            >
-              <SocialIcon name={s.icon} class="socials__icon" />
-              <span>{s.label}</span>
-            </a>
-          </li>
+        stats.map((s) => (
+          <div class="stat">
+            <div class="v">{s.since ? <><Years since={s.since} /> yrs</> : s.v}</div>
+            <div class="k">{s.k}</div>
+          </div>
         ))
       }
-    </ul>
-  </section>
-
-  <section
-    class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]"
-  >
-    <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-5">
-      Why me
-    </h2>
-    <p
-      class="text-lg leading-relaxed mb-4"
-      style="font-family: var(--font-serif);"
-    >
-      Most CRO consultants can't ship the fix. Most Shopify developers never
-      read the test.
+    </div>
+    <p>
+      The contract numbers are independent work for merchants and agencies, from a public record
+      that clients score and I can't edit.
     </p>
-    <p class="text-[var(--color-muted)] leading-relaxed">
-      So the diagnosis goes to one vendor, the implementation to another, and
-      the thing that was supposed to lift conversion arrives three months later
-      built slightly wrong. I do both halves. The person who finds the leak is
-      the person who closes it — and the person who then checks whether the
-      number actually moved.
-    </p>
-  </section>
-
-  {
-    work.length > 0 && (
-      <section class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]">
-        <div class="flex items-baseline justify-between mb-6">
-          <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)]">
-            Conversion work
-          </h2>
-          <a
-            href="/work/"
-            class="text-sm text-muted underline decoration-rule underline-offset-3 hover:text-accent"
-          >
-            All →
-          </a>
-        </div>
-        <ul class="space-y-4">
-          {work.map((item) => (
-            <li>
-              <div class="flex items-baseline justify-between gap-4">
-                <a
-                  href={item.data.url ?? `/work/${item.id}/`}
-                  class="font-medium no-underline hover:text-[var(--color-accent)]"
-                >
-                  {item.data.title}
-                </a>
-                <span class="text-sm text-[var(--color-muted)] tabular-nums shrink-0">
-                  {item.data.year}
-                </span>
-              </div>
-              <p class="mt-1 text-[var(--color-muted)] leading-relaxed">
-                {item.data.description}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
+  </Section>
 
   {
     posts.length > 0 && (
-      <section class="max-w-2xl mx-auto px-6 py-10 border-t border-[var(--color-rule)]">
-        <div class="flex items-baseline justify-between mb-6">
-          <h2 class="text-xs uppercase tracking-widest text-[var(--color-muted)]">
-            Writing
-          </h2>
-          <a
-            href="/blog/"
-            class="text-sm text-muted underline decoration-rule underline-offset-3 hover:text-accent"
-          >
-            All →
-          </a>
-        </div>
-        <ul class="space-y-4">
+      <Section title="Writing">
+        <ul class="rows">
           {posts.map((post) => (
-            <li class="flex items-baseline justify-between gap-4">
-              <a
-                href={`/blog/${post.id}/`}
-                class="no-underline hover:text-[var(--color-accent)] min-w-0"
-              >
-                {post.data.title}
-              </a>
-              <time
-                datetime={post.data.pubDate.toISOString()}
-                class="text-sm text-[var(--color-muted)] tabular-nums shrink-0"
-              >
-                {post.data.pubDate.toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                })}
+            <li class="row">
+              <time datetime={post.data.pubDate.toISOString()}>
+                {formatMonth(post.data.pubDate)}
               </time>
+              <div>
+                <h3>
+                  <a href={`/blog/${post.id}/`}>{post.data.title}</a>
+                </h3>
+              </div>
             </li>
           ))}
         </ul>
-      </section>
+        <a class="more" href="/blog/">All writing →</a>
+      </Section>
     )
   }
 
-  <Cta />
+  <Closer />
 </Base>

@@ -1,0 +1,23 @@
+{
+  // Static-assets Worker: no code, only the Astro build output.
+  // Cloudflare dashboard, Settings → Build:
+  //   Build command:  pnpm run build
+  //   Deploy command: npx wrangler deploy
+  //   Root directory: empty (the repo root)
+  "name": "jeanmanzo",
+  "compatibility_date": "2026-09-19",
+
+  "assets": {
+    // Astro writes the finished site here. _headers and _redirects are copied
+    // in from public/, so they land next to the pages they apply to.
+    "directory": "./dist",
+
+    // Astro emits folders (/about/index.html) and links to them with a
+    // trailing slash. The default handling already serves /about/ and
+    // redirects /about to it, so it is left as is.
+    "html_handling": "auto-trailing-slash",
+
+    // Unknown paths get dist/404.html with a real 404 status.
+    "not_found_handling": "404-page"
+  }
+}

@@ -1,0 +1,10 @@
+# Content-Signal declares how the content may be used:
+#   search=yes      index it and show it in search results
+#   ai-train=no     do not use it to train or fine-tune models
+#   use=reference   AI systems may cite and link to it
+# It lives here, in the repo, not in a Cloudflare dashboard setting.
+User-agent: *
+Content-Signal: search=yes, ai-train=no, use=reference
+Allow: /
+
+Sitemap: https://jeanmanzo.com/sitemap-index.xml

@@ -1,0 +1,104 @@
+<!doctype html>
+<!--
+  Source of public/og.png, the 1200x630 link preview card.
+  To regenerate: open this file in a browser and click "Download og.png",
+  then replace public/og.png with the download. Copy changes go in LINES below.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>og.png generator</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  body { margin: 0; padding: 24px; background: #ccc; font-family: system-ui; }
+  canvas { display: block; width: 600px; height: 315px; margin-bottom: 16px; box-shadow: 0 2px 12px #0003; }
+</style>
+</head>
+<body>
+<canvas id="og" width="1200" height="630"></canvas>
+<button id="dl">Download og.png</button>
+<script>
+const C = {
+  ground: "#F5F8FB", ink: "#0C1822", ink2: "#4B6275", ink3: "#7A8FA1",
+  signal: "#0082C9", rule: "#D9E2EA",
+};
+const MONO = '"IBM Plex Mono", monospace';
+const DISPLAY = "Montserrat, sans-serif";
+
+// Each line is a list of [text, color] runs, so the accent can start mid-line.
+const LINES = [
+  [["I build Shopify apps", C.ink]],
+  [["and storefronts ", C.ink], ["that stay", C.signal]],
+  [["fast and stay shipped.", C.signal]],
+];
+
+function spaced(ctx, text, x, y, tracking) {
+  for (const ch of text) {
+    ctx.fillText(ch, x, y);
+    x += ctx.measureText(ch).width + tracking;
+  }
+  return x;
+}
+
+function draw() {
+  const ctx = document.getElementById("og").getContext("2d");
+  ctx.fillStyle = C.ground;
+  ctx.fillRect(0, 0, 1200, 630);
+  ctx.fillStyle = C.signal;
+  ctx.fillRect(0, 0, 14, 630);
+  ctx.textBaseline = "alphabetic";
+
+  // eyebrow
+  ctx.beginPath();
+  ctx.arc(78, 92, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = C.ink2;
+  ctx.font = `600 19px ${MONO}`;
+  spaced(ctx, "SENIOR DEVELOPER · SHOPIFY, TYPESCRIPT, NODE", 98, 99, 2.4);
+
+  // headline
+  ctx.font = `800 80px ${DISPLAY}`;
+  LINES.forEach((runs, i) => {
+    let x = 72;
+    const y = 232 + i * 88;
+    for (const [text, color] of runs) {
+      ctx.fillStyle = color;
+      x = spaced(ctx, text, x, y, -2.8);
+    }
+  });
+
+  // footer rule
+  ctx.fillStyle = C.rule;
+  ctx.fillRect(72, 488, 1056, 2);
+
+  ctx.fillStyle = C.signal;
+  ctx.font = `600 27px ${MONO}`;
+  ctx.fillText("jeanmanzo.com", 72, 560);
+
+  ctx.textAlign = "right";
+  ctx.fillStyle = C.ink;
+  ctx.font = `700 27px ${DISPLAY}`;
+  ctx.fillText("Jean Manzo", 1128, 548);
+  ctx.fillStyle = C.ink3;
+  ctx.font = `500 16px ${MONO}`;
+  ctx.fillText("APPS  ·  THEME EXTENSIONS  ·  STOREFRONTS", 1128, 578);
+  ctx.textAlign = "left";
+}
+
+document.fonts.load(`800 80px Montserrat`)
+  .then(() => Promise.all([
+    document.fonts.load(`700 27px Montserrat`),
+    document.fonts.load(`600 19px "IBM Plex Mono"`),
+    document.fonts.load(`500 16px "IBM Plex Mono"`),
+  ]))
+  .then(draw);
+
+document.getElementById("dl").onclick = () => {
+  const a = document.createElement("a");
+  a.download = "og.png";
+  a.href = document.getElementById("og").toDataURL("image/png");
+  a.click();
+};
+</script>
+</body>
+</html>

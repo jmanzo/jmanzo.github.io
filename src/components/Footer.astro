@@ -1,36 +1,21 @@
 ---
-import { SOCIALS, SITE, OFFER } from "../consts";
+import { SOCIALS, SITE } from "../consts";
 import SocialIcon from "./SocialIcon.astro";
 const year = new Date().getFullYear();
 ---
 
-<footer class="border-t border-[var(--color-rule)] mt-24">
-  <div
-    class="max-w-2xl mx-auto px-6 py-8 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between text-sm text-[var(--color-muted)]"
-  >
-    <p>
-      © {year} {SITE.author} ·{" "}
-      <a href={OFFER.bookingUrl} target="_blank" rel="noopener noreferrer">
-        {OFFER.bookingLabel}
-      </a>
-    </p>
-    <ul class="socials socials--footer flex gap-3">
+<footer>
+  <div class="wrap">
+    <span>© {year} {SITE.author} · {SITE.role} · {SITE.location}</span>
+    <nav aria-label="Elsewhere">
       {
         SOCIALS.map((s) => (
-          <li class="socials__item">
-            <a
-              class="socials__link no-underline inline-flex items-center"
-              href={s.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={s.label}
-              title={s.label}
-            >
-              <SocialIcon name={s.icon} class="socials__icon" />
-            </a>
-          </li>
+          <a href={s.href} target="_blank" rel="noopener noreferrer">
+            <SocialIcon name={s.icon} size={15} />
+            {s.label}
+          </a>
         ))
       }
-    </ul>
+    </nav>
   </div>
 </footer>

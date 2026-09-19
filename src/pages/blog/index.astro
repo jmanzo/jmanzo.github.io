@@ -1,7 +1,9 @@
 ---
 import Base from "../../layouts/Base.astro";
-import Cta from "../../components/Cta.astro";
+import PageHead from "../../components/PageHead.astro";
+import Closer from "../../components/Closer.astro";
 import { getCollection } from "astro:content";
+import { formatMonth } from "../../consts";
 
 const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
   (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
@@ -10,52 +12,35 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
 
 <Base
   title="Writing"
-  description="Notes on Shopify, conversion, and shipping changes that move the number."
+  description="Notes on Shopify development, TypeScript, AI-assisted coding, and shipping changes to stores that are taking orders."
 >
-  <section class="max-w-2xl mx-auto px-6 pt-16 pb-8">
-    <p class="text-xs uppercase tracking-widest text-[var(--color-muted)] mb-3">
-      Writing
-    </p>
-    <h1
-      class="text-3xl sm:text-4xl font-semibold tracking-tight mb-4"
-      style="font-family: var(--font-serif);"
-    >
-      Notes from inside the theme
-    </h1>
-    <p class="text-[var(--color-muted)] leading-relaxed">
-      Shopify, conversion, and what actually happens when you ship a change to a
-      store that's taking orders.
-    </p>
+  <PageHead
+    eyebrow="Writing"
+    title="Notes from the codebase"
+    lede="Shopify, TypeScript, AI-assisted development, and what happens when you ship to a store that's taking orders."
+  />
+
+  <section>
+    <div class="wrap sec">
+      <ul class="rows">
+        {
+          posts.map((post) => (
+            <li class="row">
+              <time datetime={post.data.pubDate.toISOString()}>
+                {formatMonth(post.data.pubDate)}
+              </time>
+              <div>
+                <h3>
+                  <a href={`/blog/${post.id}/`}>{post.data.title}</a>
+                </h3>
+                <p>{post.data.description}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </section>
 
-  <section class="max-w-2xl mx-auto px-6 pb-16">
-    <ul class="divide-y divide-[var(--color-rule)]">
-      {
-        posts.map((post) => (
-          <li class="py-5 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-            <a
-              href={`/blog/${post.id}/`}
-              class="no-underline hover:text-[var(--color-accent)] min-w-0"
-            >
-              <span class="font-medium">{post.data.title}</span>
-              <span class="text-[var(--color-muted)]">
-                {" "}— {post.data.description}
-              </span>
-            </a>
-            <time
-              datetime={post.data.pubDate.toISOString()}
-              class="order-first text-sm text-[var(--color-muted)] tabular-nums shrink-0 sm:order-0"
-            >
-              {post.data.pubDate.toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-              })}
-            </time>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
-
-  <Cta />
+  <Closer />
 </Base>

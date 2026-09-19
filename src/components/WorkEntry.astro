@@ -1,0 +1,26 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  item: CollectionEntry<"work">;
+  index: number;
+}
+
+const { item, index } = Astro.props;
+const href = item.data.url ?? `/work/${item.id}/`;
+const isExternal = /^https?:\/\//.test(href);
+---
+
+<article class="entry">
+  <span class="entry-n">{String(index + 1).padStart(2, "0")}</span>
+  <h3>
+    <a href={href} {...isExternal && { target: "_blank", rel: "noopener noreferrer" }}>
+      {item.data.title}
+    </a>
+  </h3>
+  <p>{item.data.description}</p>
+  <div class="meta">
+    <span class="chip"><b>{item.data.year}</b></span>
+    {item.data.stack?.map((s) => <span class="chip">{s}</span>)}
+  </div>
+</article>

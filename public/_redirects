@@ -1,0 +1,6 @@
+# Retired URLs from the CRO offer. 301 on purpose: these pages are gone for
+# good, so browsers and search engines may cache the move.
+/free-tier    /    301
+/free-tier/   /    301
+/audit        /    301
+/audit/       /    301
