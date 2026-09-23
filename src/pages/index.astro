@@ -2,7 +2,7 @@
 import Base from "../layouts/Base.astro";
 import Section from "../components/Section.astro";
 import Closer from "../components/Closer.astro";
-import WorkEntry from "../components/WorkEntry.astro";
+import ProjectEntry from "../components/ProjectEntry.astro";
 import Years from "../components/Years.astro";
 import { getCollection } from "astro:content";
 import { CAREER, formatMonth } from "../consts";
@@ -11,9 +11,8 @@ const posts = (await getCollection("blog", ({ data }) => !data.draft))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
   .slice(0, 4);
 
-const work = (await getCollection("work"))
-  .sort((a, b) => (b.data.order ?? 0) - (a.data.order ?? 0))
-  .slice(0, 3);
+const featured = (await getCollection("projects", ({ data }) => data.tier === "featured"))
+  .sort((a, b) => (b.data.order ?? 0) - (a.data.order ?? 0));
 
 const stats = [
   { since: CAREER.developerSince, k: "Building for the web" },
@@ -46,19 +45,19 @@ const stats = [
 
         <div class="cta-row">
           <a class="btn btn-a" href="#contact">Get in touch</a>
-          <a class="btn btn-b" href="/work/">See the work</a>
+          <a class="btn btn-b" href="/projects/">See the projects</a>
         </div>
       </div>
 
       <div class="panel">
         <div class="panel-head">
-          <h2>Selected work</h2>
-          <span class="lab">Case studies</span>
+          <h2>Featured projects</h2>
+          <span class="lab">{featured.length} projects</span>
         </div>
-        {work.map((item, i) => <WorkEntry item={item} index={i} />)}
+        {featured.map((item, i) => <ProjectEntry item={item} index={i} showStack={false} showDescription={false} />)}
         <div class="panel-foot">
-          <span>Each one links to the full write-up.</span>
-          <a class="more" href="/work/">All work →</a>
+          <span>Who it was for and what my part was, on each page.</span>
+          <a class="more" href="/projects/">All projects →</a>
         </div>
       </div>
     </div>

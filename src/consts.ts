@@ -49,7 +49,8 @@ export const SOCIALS: ReadonlyArray<{
 ];
 
 export const NAV = [
-  { label: "Work", href: "/work/" },
+  { label: "Projects", href: "/projects/" },
+  { label: "Case studies", href: "/work/" },
   { label: "Writing", href: "/blog/" },
   { label: "About", href: "/about/" },
 ] as const;

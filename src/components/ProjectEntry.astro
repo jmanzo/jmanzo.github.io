@@ -1,0 +1,25 @@
+---
+/** Compact row for a project: used in the home hero panel and the /projects list. */
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  item: CollectionEntry<"projects">;
+  index: number;
+  showStack?: boolean;
+  showDescription?: boolean;
+}
+
+const { item, index, showStack = true, showDescription = true } = Astro.props;
+const { title, description, period, kind, stack } = item.data;
+---
+
+<article class="entry">
+  <span class="entry-n">{String(index + 1).padStart(2, "0")}</span>
+  <h3><a href={`/projects/${item.id}/`}>{title}</a></h3>
+  {showDescription && <p>{description}</p>}
+  <div class="meta">
+    <span class="chip"><b>{period}</b></span>
+    <span class="chip">{kind}</span>
+    {showStack && stack.slice(0, 4).map((s) => <span class="chip">{s}</span>)}
+  </div>
+</article>

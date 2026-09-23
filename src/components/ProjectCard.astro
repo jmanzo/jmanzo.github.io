@@ -1,0 +1,44 @@
+---
+/** Featured project card with cover image, for the /projects grid. */
+import type { CollectionEntry } from "astro:content";
+import { Image } from "astro:assets";
+
+interface Props {
+  item: CollectionEntry<"projects">;
+  eager?: boolean;
+}
+
+const { item, eager = false } = Astro.props;
+const { title, description, period, kind, client, cover, stack } = item.data;
+const href = `/projects/${item.id}/`;
+---
+
+<article class="pcard">
+  <div class="pcard-media">
+    {
+      cover && (
+        <Image
+          src={cover}
+          alt=""
+          {...(cover.format !== "svg" && {
+            widths: [480, 720, 960],
+            sizes: "(min-width: 900px) 520px, 100vw",
+          })}
+          loading={eager ? "eager" : "lazy"}
+        />
+      )
+    }
+  </div>
+  <div class="pcard-body">
+    <div class="pcard-top">
+      <span class="lab">{kind}</span>
+      <span class="lab">{period}</span>
+    </div>
+    <h3><a href={href}>{title}</a></h3>
+    <p class="pcard-client">{client}</p>
+    <p>{description}</p>
+    <div class="meta">
+      {stack.slice(0, 5).map((s) => <span class="chip">{s}</span>)}
+    </div>
+  </div>
+</article>
