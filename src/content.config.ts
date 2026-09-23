@@ -29,4 +29,32 @@ const work = defineCollection({
   }),
 });
 
-export const collections = { blog, work };
+/**
+ * Portfolio projects. `featured` entries get the long treatment and appear on
+ * the home page; `more` entries are shorter and only listed on /projects/.
+ * Attribution fields are required on purpose: every entry has to say who the
+ * work was for and in what capacity, so nothing reads as more than it was.
+ */
+const projects = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      tier: z.enum(["featured", "more"]),
+      order: z.number().default(0),
+      kind: z.string(),
+      client: z.string(),
+      engagement: z.string(),
+      role: z.string(),
+      period: z.string(),
+      status: z.string(),
+      stack: z.array(z.string()),
+      links: z.array(z.object({ label: z.string(), href: z.string() })).default([]),
+      related: z.array(z.string()).default([]),
+      cover: image().optional(),
+      coverAlt: z.string().optional(),
+    }),
+});
+
+export const collections = { blog, work, projects };

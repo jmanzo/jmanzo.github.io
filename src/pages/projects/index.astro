@@ -1,0 +1,63 @@
+---
+import Base from "../../layouts/Base.astro";
+import PageHead from "../../components/PageHead.astro";
+import Closer from "../../components/Closer.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+import ProjectEntry from "../../components/ProjectEntry.astro";
+import { getCollection } from "astro:content";
+
+const all = (await getCollection("projects")).sort(
+  (a, b) => (b.data.order ?? 0) - (a.data.order ?? 0)
+);
+const featured = all.filter((p) => p.data.tier === "featured");
+const more = all.filter((p) => p.data.tier === "more");
+---
+
+<Base
+  title="Projects"
+  description="Shopify apps, headless storefronts, themes and developer tools: products I built and run, client work, and agency work, each with who it was for and what my part was."
+>
+  <PageHead
+    eyebrow="Projects"
+    title="Things I've built and shipped"
+    lede="Products of my own, direct client work and agency work. Each page says who it was for, what my part was, and how it was built."
+  />
+
+  <section>
+    <div class="wrap sec">
+      <div class="sec-head">
+        <h2>Featured</h2>
+        <span class="lab">{featured.length} projects</span>
+      </div>
+      <div class="pgrid">
+        {featured.map((item, i) => <ProjectCard item={item} eager={i < 2} />)}
+      </div>
+    </div>
+  </section>
+
+  {
+    more.length > 0 && (
+      <section>
+        <div class="wrap sec">
+          <div class="panel">
+            <div class="panel-head">
+              <h2>More projects</h2>
+              <span class="lab">{more.length} entries</span>
+            </div>
+            {more.map((item, i) => (
+              <ProjectEntry item={item} index={featured.length + i} />
+            ))}
+            <div class="panel-foot">
+              <span>
+                Looking for smaller, single-feature builds? The{" "}
+                <a href="/work/">case studies</a> cover those.
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <Closer heading="Have something like this to build?" />
+</Base>

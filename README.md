@@ -10,7 +10,7 @@ The visual design comes from the retired `cro-free-tier-lp` landing: same tokens
 - Plain CSS with design tokens in `src/styles/global.css`. No CSS framework.
 - Montserrat (display), Roboto (body) and IBM Plex Mono (labels, code) from Google Fonts
 - [Sharp](https://sharp.pixelplumbing.com/) powers Astro's image service (WebP/AVIF, responsive variants)
-- Type-safe content collections (`blog`, `work`) defined in `src/content.config.ts`
+- Type-safe content collections (`blog`, `work`, `projects`) defined in `src/content.config.ts`
 - pnpm + Node `>=22.12.0` (see `.nvmrc`)
 
 ## Commands
@@ -39,7 +39,8 @@ All commands run from the project root.
 │   ├── components/         # Header, Footer, Section, PageHead, WorkEntry, Closer, SocialIcon
 │   ├── content/
 │   │   ├── blog/           # Blog posts (Markdown / MDX)
-│   │   └── work/           # Work entries (Markdown / MDX)
+│   │   ├── work/           # Work entries (Markdown / MDX)
+│   │   └── projects/       # Portfolio projects (Markdown / MDX), images in src/assets/projects/
 │   ├── content.config.ts   # Zod schemas for both collections
 │   ├── consts.ts           # SITE / CAREER / CONTACT / SOCIALS / NAV constants
 │   ├── layouts/Base.astro  # Shared HTML shell, head meta, fonts

@@ -1,0 +1,151 @@
+---
+import Base from "../../layouts/Base.astro";
+import Closer from "../../components/Closer.astro";
+import { getCollection, getEntry, render } from "astro:content";
+import { Image, getImage } from "astro:assets";
+import { SITE } from "../../consts";
+
+export async function getStaticPaths() {
+  const items = (await getCollection("projects")).sort(
+    (a, b) => (b.data.order ?? 0) - (a.data.order ?? 0)
+  );
+  return items.map((item, i) => ({
+    params: { slug: item.id },
+    props: { item, next: items[(i + 1) % items.length] },
+  }));
+}
+
+const { item, next } = Astro.props;
+const { Content } = await render(item);
+const d = item.data;
+
+const related = (
+  await Promise.all(d.related.map((slug) => getEntry("blog", slug)))
+).filter((p) => p !== undefined);
+
+const ogImage =
+  d.cover && d.cover.format !== "svg"
+    ? await getImage({ src: d.cover, width: 1200, format: "jpeg" })
+    : undefined;
+
+const pageUrl = new URL(`/projects/${item.id}/`, Astro.site).toString();
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  name: d.title,
+  description: d.description,
+  url: pageUrl,
+  author: { "@id": `${SITE.url}/#person`, "@type": "Person", name: SITE.author, url: SITE.url },
+  keywords: d.stack.join(", "),
+  ...(ogImage && { image: new URL(ogImage.src, Astro.site).toString() }),
+};
+
+const facts = [
+  { k: "Client", v: d.client },
+  { k: "Engagement", v: d.engagement },
+  { k: "My role", v: d.role },
+  { k: "Period", v: d.period },
+];
+---
+
+<Base title={d.title} description={d.description} ogImage={ogImage?.src} ogImageAlt={d.coverAlt}>
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+  <article class="wrap article">
+    <header class="article-head">
+      <div class="eyebrow">
+        <span class="dot"></span>
+        <span class="lab"><a href="/projects/">Projects</a> · {d.kind}</span>
+      </div>
+      <h1>{d.title}</h1>
+      <p class="desc">{d.description}</p>
+    </header>
+
+    <aside class="facts" aria-label="Project facts">
+      <dl>
+        {
+          facts.map((f) => (
+            <div>
+              <dt class="lab">{f.k}</dt>
+              <dd>{f.v}</dd>
+            </div>
+          ))
+        }
+        <div class="facts-wide">
+          <dt class="lab">Status</dt>
+          <dd>{d.status}</dd>
+        </div>
+        <div class="facts-wide">
+          <dt class="lab">Stack</dt>
+          <dd class="meta">{d.stack.map((s) => <span class="chip">{s}</span>)}</dd>
+        </div>
+      </dl>
+      {
+        d.links.length > 0 && (
+          <div class="facts-links">
+            {d.links.map((l) => {
+              const external = /^https?:\/\//.test(l.href);
+              return (
+                <a
+                  class="more"
+                  href={l.href}
+                  {...(external && { target: "_blank", rel: "noopener noreferrer" })}
+                >
+                  {l.label} {external ? "↗" : "→"}
+                </a>
+              );
+            })}
+          </div>
+        )
+      }
+    </aside>
+
+    {
+      d.cover && (
+        <Image
+          src={d.cover}
+          alt={d.coverAlt ?? ""}
+          {...(d.cover.format !== "svg" && {
+            widths: [480, 800, 1200],
+            sizes: "(min-width: 800px) 720px, 100vw",
+          })}
+          loading="eager"
+          class="article-hero"
+        />
+      )
+    }
+
+    <div class="prose article-body">
+      <Content />
+
+      {
+        related.length > 0 && (
+          <>
+            <h2>Related writing</h2>
+            <ul>
+              {related.map((p) => (
+                <li>
+                  <a href={`/blog/${p.id}/`}>{p.data.title}</a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+    </div>
+
+    <nav class="next-project" aria-label="Next project">
+      <a href="/projects/" class="more">← All projects</a>
+      {
+        next && next.id !== item.id && (
+          <a href={`/projects/${next.id}/`} class="next-link">
+            <span class="lab">Next project</span>
+            <span class="next-title">{next.data.title}</span>
+          </a>
+        )
+      }
+    </nav>
+  </article>
+
+  <Closer heading="Have something like this to build?" />
+</Base>
