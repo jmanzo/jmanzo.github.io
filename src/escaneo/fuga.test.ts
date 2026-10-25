@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { computeFuga, ctaText, parseAnswers, parseChannel, parseStore, routeLead } from "./fuga.ts";
+import { arreglos, computeFuga, ctaText, fugaBreakdown, parseAnswers, parseChannel, parseStore, routeLead } from "./fuga.ts";
 
 test("parseStore accepts a bare domain, a full URL and an Instagram handle", () => {
   assert.deepEqual(parseStore("Tienda.com"), { kind: "url", url: "https://tienda.com", host: "tienda.com" });
@@ -74,4 +74,33 @@ test("ctaText carries the result ID only when there is one", () => {
     "Hola Jean, hice el Escaneo de operar a mano para @tienda (resultado abc123). Me sale que se me van 30 horas al mes. Quiero mi Comprobación.",
   );
   assert.ok(!ctaText(a).includes("resultado"));
+});
+
+test("ctaText asks for what the lead's route offers", () => {
+  const a = parseAnswers({ store: "@tienda", orders: "5-9", payments: ["card"], hoursPerDay: 1 })!;
+  assert.ok(ctaText(a, "abc123", "email").endsWith("Quiero saber qué arreglarías primero en mi tienda."));
+  assert.ok(ctaText(a, "abc123", "espera").endsWith("Quiero pasar mi tienda a Shopify."));
+});
+
+test("fugaBreakdown shows the math with the merchant's own numbers", () => {
+  const a = parseAnswers({
+    store: "tienda.com",
+    orders: "25-49",
+    payments: ["cod"],
+    hoursPerDay: 2.5,
+    cod: { rejectedPerTen: 3, returnCost: 12000 },
+  })!;
+  const [time, cod] = fugaBreakdown(a);
+  assert.deepEqual(time.rows[0], ["2,5 horas al día × 30 días", "75 horas al mes"]);
+  assert.deepEqual(time.rows[1], ["75 horas ÷ 8 horas por jornada", "9 jornadas al mes"]);
+  assert.deepEqual(cod.rows[1], ["3 de cada 10 rechazados", "333 envíos que vuelven"]);
+  assert.deepEqual(cod.rows[2], ["333 × 12.000 por envío", "3.996.000 al mes"]);
+  assert.equal(fugaBreakdown({ ...a, payments: ["card"], cod: undefined }).length, 1);
+});
+
+test("arreglos only lists the modules that apply to how the merchant gets paid", () => {
+  const titles = (payments: Parameters<typeof arreglos>[0]["payments"]) => arreglos({ payments }).map((m) => m.title);
+  assert.deepEqual(titles(["cod", "proof"]), ["Contraentrega", "Comprobantes", "Sincronización de pedidos"]);
+  assert.deepEqual(titles(["wallet"]), ["Comprobantes", "Sincronización de pedidos"]);
+  assert.deepEqual(titles(["card"]), ["Sincronización de pedidos"]);
 });

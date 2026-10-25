@@ -6,10 +6,12 @@
  *   POST /api/scan     answers in, store read, result saved, public part out
  *   GET  /api/result   ?id=<id>, the public part of a saved result
  *   POST /api/event    funnel step from the page (sendBeacon)
+ *   POST /api/unlock   contact in, full result out, Klaviyo and Telegram after
  *   GET  /api/go       ?r=<id>, counts the click and redirects to Jean's WhatsApp
  */
 
-import { CONTACT } from "../src/consts.ts";
+import { CONTACT, SITE } from "../src/consts.ts";
+import { countryOf, parseContact } from "../src/escaneo/contacto.ts";
 import {
   computeFuga,
   ctaText,
@@ -18,9 +20,11 @@ import {
   routeLead,
   type Answers,
   type Platform,
+  type Route,
   type Store,
 } from "../src/escaneo/fuga.ts";
 import { detectPlatform, findHallazgos, type Finding, type Product } from "../src/escaneo/hallazgos.ts";
+import { notifyTelegram, saveToKlaviyo } from "./notify.ts";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -81,16 +85,29 @@ async function readStore(store: Store): Promise<StoreRead> {
   }
 }
 
-/** What the page may see before the unlock: no breakdown, only the worst finding. */
-function publicResult(id: string, answers: Answers, read: Pick<StoreRead, "platform" | "findings">) {
-  return {
-    id,
-    answers,
-    fuga: computeFuga(answers),
-    platform: read.platform,
-    finding: read.findings[0] ?? null,
-  };
+type Row = {
+  id: string;
+  session: string | null;
+  channel: string | null;
+  answers: string;
+  platform: Platform;
+  route: Route;
+  findings: string;
+  unlocked_at: number | null;
+};
+
+/**
+ * What the page may see. Before the unlock: the headline and only the worst
+ * finding. After it: every finding and the lead's route.
+ */
+function view(row: Row) {
+  const answers: Answers = JSON.parse(row.answers);
+  const findings: Finding[] = JSON.parse(row.findings);
+  const base = { id: row.id, answers, fuga: computeFuga(answers), platform: row.platform, finding: findings[0] ?? null };
+  return row.unlocked_at ? { ...base, unlocked: true, route: row.route, findings } : { ...base, unlocked: false };
 }
+
+const resultUrl = (id: string) => `${SITE.url}/es/operar-a-mano/?r=${id}`;
 
 async function logEvent(
   env: Env,
@@ -111,6 +128,7 @@ async function scan(request: Request, env: Env, ctx: ExecutionContext) {
   const read = await readStore(answers.store);
   const fuga = computeFuga(answers);
   const id = newId();
+  const route = routeLead(answers, read.platform);
   await env.DB.prepare(
     `INSERT INTO results (id, created_at, session, channel, answers, orders, payments, platform, reachable, route, hours_per_month, money_per_month, findings)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -125,27 +143,69 @@ async function scan(request: Request, env: Env, ctx: ExecutionContext) {
       answers.payments.join(","),
       read.platform,
       read.reachable ? 1 : 0,
-      routeLead(answers, read.platform),
+      route,
       fuga.hoursPerMonth,
       fuga.moneyPerMonth,
       JSON.stringify(read.findings),
     )
     .run();
   ctx.waitUntil(logEvent(env, { type: "completed", session, channel, resultId: id }));
-  return json(publicResult(id, answers, read));
+  return json(
+    view({ id, session, channel, answers: JSON.stringify(answers), platform: read.platform, route, findings: JSON.stringify(read.findings), unlocked_at: null }),
+  );
 }
 
 async function loadResult(env: Env, id: string) {
-  return env.DB.prepare("SELECT id, session, channel, answers, platform, findings FROM results WHERE id = ?")
+  return env.DB.prepare(
+    "SELECT id, session, channel, answers, platform, route, findings, unlocked_at FROM results WHERE id = ?",
+  )
     .bind(id)
-    .first<{ id: string; session: string | null; channel: string | null; answers: string; platform: Platform; findings: string }>();
+    .first<Row>();
 }
 
 async function result(url: URL, env: Env) {
   const id = url.searchParams.get("id");
   const row = isId(id) ? await loadResult(env, id) : null;
   if (!row) return json({ error: "not found" }, 404);
-  return json(publicResult(row.id, JSON.parse(row.answers), { platform: row.platform, findings: JSON.parse(row.findings) }));
+  return json(view(row));
+}
+
+async function unlock(request: Request, env: Env, ctx: ExecutionContext) {
+  const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
+  const id = typeof body?.id === "string" ? body.id : null;
+  const contact = parseContact(body?.contact);
+  // Without the Ley 1581 authorization nothing about the contact is kept.
+  if (!contact || body?.consent !== true) return json({ error: "invalid contact" }, 400);
+  const row = isId(id) ? await loadResult(env, id) : null;
+  if (!row) return json({ error: "not found" }, 404);
+
+  const now = Date.now();
+  const country = countryOf(contact.whatsapp);
+  await env.DB.prepare("UPDATE results SET unlocked_at = ?, country = ? WHERE id = ?").bind(now, country, row.id).run();
+  const unlocked = { ...row, unlocked_at: now };
+  const answers: Answers = JSON.parse(row.answers);
+  const lead = {
+    id: row.id,
+    url: resultUrl(row.id),
+    contact,
+    country,
+    channel: parseChannel(row.channel),
+    answers,
+    fuga: computeFuga(answers),
+    platform: row.platform,
+    route: row.route,
+    findings: JSON.parse(row.findings),
+    consentAt: now,
+  };
+  const session = isSession(body?.session) ? body.session : row.session;
+  ctx.waitUntil(
+    Promise.allSettled([
+      logEvent(env, { type: "unlocked", session, channel: row.channel, resultId: row.id }),
+      notifyTelegram(env, lead),
+      saveToKlaviyo(env, lead),
+    ]).then((results) => results.forEach((r) => r.status === "rejected" && console.error("unlock", row.id, r.reason))),
+  );
+  return json(view(unlocked));
 }
 
 const EVENT_TYPES = new Set(["view", "answer"]);
@@ -165,7 +225,7 @@ async function event(request: Request, env: Env) {
 async function go(url: URL, env: Env, ctx: ExecutionContext) {
   const id = url.searchParams.get("r");
   const row = isId(id) ? await loadResult(env, id) : null;
-  const text = row ? ctaText(JSON.parse(row.answers), row.id) : "Hola Jean, hice el Escaneo de operar a mano. Quiero mi Comprobación.";
+  const text = row ? ctaText(JSON.parse(row.answers), row.id, row.route) : "Hola Jean, hice el Escaneo de operar a mano. Quiero mi Comprobación.";
   if (row) ctx.waitUntil(logEvent(env, { type: "click", session: row.session, channel: row.channel, resultId: row.id }));
   const to = CONTACT.whatsapp
     ? `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(text)}`
@@ -185,6 +245,8 @@ export default {
           return await result(url, env);
         case "POST /api/event":
           return await event(request, env);
+        case "POST /api/unlock":
+          return await unlock(request, env, ctx);
         case "GET /api/go":
           return await go(url, env, ctx);
       }

@@ -26,3 +26,6 @@ pnpm-debug.log*
 
 # wrangler local state (local D1)
 .wrangler/
+
+# Local secrets for wrangler dev (written by scripts/setup-escaneo.sh)
+.dev.vars

@@ -10,6 +10,7 @@ WITH s AS (
     MAX(type = 'answer' AND step = 'payments') AS payments,
     MAX(type = 'answer' AND step = 'hours') AS hours,
     MAX(type = 'completed') AS completed,
+    MAX(type = 'unlocked') AS unlocked,
     MAX(type = 'click') AS clicked
   FROM events
   WHERE at > (unixepoch() - 7 * 86400) * 1000 AND session IS NOT NULL
@@ -18,13 +19,16 @@ WITH s AS (
 SELECT COALESCE(channel, 'sin canal') AS channel,
   SUM(viewed) AS visitas, SUM(store) AS iniciados, SUM(orders) AS pedidos,
   SUM(payments) AS pagos, SUM(hours) AS horas, SUM(completed) AS completados,
+  SUM(unlocked) AS desbloqueados,
   SUM(clicked) AS clics_whatsapp
 FROM s GROUP BY channel ORDER BY visitas DESC;
 
--- Completed Escaneos by segment: orders per day, how they get paid, platform.
-SELECT orders, payments, platform, route, COUNT(*) AS escaneos,
+-- Completed Escaneos by segment: orders per day, how they get paid, platform
+-- and country (known only after the unlock, from the WhatsApp prefix).
+SELECT orders, payments, platform, route, country, COUNT(*) AS escaneos,
+  SUM(unlocked_at IS NOT NULL) AS desbloqueados,
   SUM(id IN (SELECT result_id FROM events WHERE type = 'click')) AS clics_whatsapp
 FROM results
 WHERE created_at > (unixepoch() - 7 * 86400) * 1000
-GROUP BY orders, payments, platform, route
+GROUP BY orders, payments, platform, route, country
 ORDER BY escaneos DESC;

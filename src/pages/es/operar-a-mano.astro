@@ -8,7 +8,8 @@ import { ORDER_BANDS, PAYMENT_METHODS } from "../../escaneo/fuga";
 // computed in the browser so it shows at once; the Worker (worker/index.ts)
 // reads the store, saves the result at ?r=<id> and logs the funnel. If the
 // Worker is down, the result still shows and the CTA goes straight to
-// WhatsApp. The unlock replaces the interim CTA.
+// WhatsApp. Once saved, the unlock form takes the CTA's place, and the full
+// result (breakdown, every finding, the plan and the route's CTA) shows after it.
 
 const proofs = [
   {
@@ -175,10 +176,77 @@ const next = [
             <p class="finding-title" data-finding-title></p>
             <p class="finding-detail" data-finding-detail></p>
           </div>
-          <div class="cta-row">
+          <div class="cta-row" data-direct>
             <a class="btn btn-a" data-cta target="_blank" rel="noopener">
               Quiero ver cómo recuperarlo
             </a>
+          </div>
+
+          <form class="unlock" data-unlock hidden novalidate>
+            <p class="lab">Resultado completo</p>
+            <p class="unlock-lede">
+              El desglose de tu Fuga, todo lo que encontré en tu tienda y cómo se arregla.
+            </p>
+            <label class="q" for="unlock-name">Tu nombre</label>
+            <input id="unlock-name" name="name" type="text" autocomplete="name" />
+            <label class="q" for="unlock-whatsapp">Tu WhatsApp</label>
+            <div class="unit phone">
+              <span>+</span>
+              <input
+                id="unlock-whatsapp"
+                name="whatsapp"
+                type="text"
+                inputmode="tel"
+                autocomplete="tel"
+                placeholder="57 300 123 4567"
+              />
+            </div>
+            <p class="hint">Con el código de tu país.</p>
+            <label class="q" for="unlock-email">Tu email <span class="opt">(opcional)</span></label>
+            <input
+              id="unlock-email"
+              name="email"
+              type="text"
+              inputmode="email"
+              autocomplete="email"
+              autocapitalize="off"
+              spellcheck="false"
+            />
+            <p class="hint">Te mando una copia del resultado completo para que la tengas a mano.</p>
+            <label class="consent">
+              <input type="checkbox" name="consent" />
+              <span>
+                Autorizo el tratamiento de mis datos según la{" "}
+                <a href="/es/privacidad/" target="_blank" rel="noopener">política de privacidad</a>.
+              </span>
+            </label>
+            <p class="scan-error" data-unlock-error role="alert"></p>
+            <button type="submit" class="btn btn-a">Ver el resultado completo</button>
+          </form>
+
+          <div class="full" data-full hidden>
+            <div class="full-sec">
+              <p class="lab">Desglose</p>
+              <div data-breakdown></div>
+            </div>
+            <div class="full-sec">
+              <p class="lab">Lo que encontré en tu tienda</p>
+              <ol class="list" data-findings></ol>
+              <p class="hint" data-no-findings hidden></p>
+            </div>
+            <div class="full-sec">
+              <p class="lab">Cómo se arregla</p>
+              <ol class="list" data-plan></ol>
+            </div>
+            <div class="route">
+              <p class="route-title" data-route-title></p>
+              <p class="route-body" data-route-body></p>
+              <p class="hint" data-copy-sent hidden></p>
+              <a class="btn btn-a" data-route-cta target="_blank" rel="noopener"></a>
+            </div>
+          </div>
+
+          <div class="cta-row">
             <button type="button" class="btn btn-b" data-restart>Volver a calcular</button>
           </div>
         </div>
@@ -245,9 +313,12 @@ const next = [
 </script>
 
 <script>
+  import { emailOf, validName, whatsappDigits } from "../../escaneo/contacto";
   import {
+    arreglos,
     computeFuga,
     ctaText,
+    fugaBreakdown,
     formatNumber as fmt,
     parseChannel,
     parseStore,
@@ -255,7 +326,9 @@ const next = [
     type Fuga,
     type OrderBand,
     type PaymentMethod,
+    type Platform,
     type RawAnswers,
+    type Route,
   } from "../../escaneo/fuga";
   import type { Finding } from "../../escaneo/hallazgos";
 
@@ -265,7 +338,10 @@ const next = [
   };
 
   /** What /api/scan and /api/result return (worker/index.ts, publicResult). */
-  type Saved = { id: string; answers: Answers; fuga: Fuga; finding: Finding | null };
+  type Saved = { id: string; answers: Answers; fuga: Fuga; platform: Platform; finding: Finding | null } & (
+    | { unlocked: false }
+    | { unlocked: true; route: Route; findings: Finding[] }
+  );
 
   const panel = document.getElementById("escaneo")!;
   const form = panel.querySelector<HTMLFormElement>("[data-scan]")!;
@@ -277,6 +353,10 @@ const next = [
   const reading = panel.querySelector<HTMLElement>("[data-reading]")!;
   const finding = panel.querySelector<HTMLElement>("[data-finding]")!;
   const cta = panel.querySelector<HTMLAnchorElement>("[data-cta]")!;
+  const direct = panel.querySelector<HTMLElement>("[data-direct]")!;
+  const unlockForm = panel.querySelector<HTMLFormElement>("[data-unlock]")!;
+  const unlockError = panel.querySelector<HTMLElement>("[data-unlock-error]")!;
+  const full = panel.querySelector<HTMLElement>("[data-full]")!;
   const steps = [...form.querySelectorAll<HTMLFieldSetElement>("[data-step]")];
 
   const params = new URLSearchParams(location.search);
@@ -379,23 +459,118 @@ const next = [
     panel.querySelector("[data-basis]")!.textContent = `Con ${basis.join(", ")}.`;
 
     cta.href = directCta(a);
+    direct.hidden = false;
     finding.hidden = true;
+    unlockForm.hidden = true;
+    full.hidden = true;
     form.hidden = true;
     result.hidden = false;
     progress.textContent = "Resultado";
   }
 
+  let savedId: string | null = null;
+
   /** Adds what only the Worker knows: the store finding and the saved result's link. */
   function renderSaved(saved: Saved) {
+    savedId = saved.id;
     if (saved.finding) {
       panel.querySelector("[data-finding-title]")!.textContent = saved.finding.title;
       panel.querySelector("[data-finding-detail]")!.textContent = saved.finding.detail;
       finding.hidden = false;
     }
-    cta.href = `/api/go?r=${saved.id}`;
     const url = new URL(location.href);
     url.searchParams.set("r", saved.id);
     history.replaceState(null, "", url);
+    direct.hidden = true;
+    if (saved.unlocked) renderFull(saved);
+    else unlockForm.hidden = false;
+  }
+
+  const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, className?: string) => {
+    const node = document.createElement(tag);
+    if (text) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  };
+
+  function listItems(list: HTMLElement, items: { title: string; body: string }[]) {
+    list.replaceChildren(
+      ...items.map((i) => {
+        const li = el("li");
+        li.append(el("p", i.title, "item-title"), el("p", i.body, "item-body"));
+        return li;
+      }),
+    );
+  }
+
+  /** The route's offer (lead-magnets.md, "Ruta de cada lead"). The price never shows. */
+  function routeCopy(route: Route, platform: Platform) {
+    switch (route) {
+      case "comprobacion":
+        return {
+          title: "Tu tienda califica para la Comprobación",
+          body: "Pruebo cuánto tarda en responder tu WhatsApp de ventas y te mando una demo con tus productos. Es gratis y no tienes que instalar nada.",
+          cta: "Quiero mi Comprobación",
+        };
+      case "email":
+        return {
+          title: "Con tu volumen, lo que más te mueve ahora es vender más",
+          body: "Puedo revisar tu tienda y decirte qué arreglaría primero para que te compren más.",
+          cta: "Quiero saber qué arreglar primero",
+        };
+      case "espera":
+        return {
+          title: "Por ahora esto funciona solo con Shopify",
+          body:
+            platform === "none"
+              ? "Te anoté en la lista de espera para cuando funcione con ventas por Instagram. Si lo quieres antes, puedo montarte la tienda en Shopify."
+              : "Te anoté en la lista de espera para cuando funcione con tu plataforma. Si lo quieres antes, puedo migrar tu tienda a Shopify.",
+          cta: "Quiero pasar a Shopify",
+        };
+    }
+  }
+
+  function renderFull(saved: Extract<Saved, { unlocked: true }>, email?: string | null) {
+    panel.querySelector("[data-breakdown]")!.replaceChildren(
+      ...fugaBreakdown(saved.answers).map((section) => {
+        const table = el("table", undefined, "breakdown");
+        table.append(el("caption", section.title));
+        for (const [math, total] of section.rows) {
+          const tr = el("tr");
+          tr.append(el("td", math), el("td", total));
+          table.append(tr);
+        }
+        return table;
+      }),
+    );
+
+    listItems(
+      panel.querySelector("[data-findings]")!,
+      saved.findings.map((f) => ({ title: f.title, body: f.detail })),
+    );
+    const none = panel.querySelector<HTMLElement>("[data-no-findings]")!;
+    none.hidden = saved.findings.length > 0;
+    none.textContent =
+      saved.platform === "none"
+        ? "Con un @ de Instagram no hay tienda que revisar desde fuera. La Comprobación mira tu WhatsApp de ventas."
+        : "No encontré problemas desde fuera. La Comprobación revisa lo que solo se ve por dentro.";
+
+    listItems(panel.querySelector("[data-plan]")!, arreglos(saved.answers));
+
+    const copy = routeCopy(saved.route, saved.platform);
+    panel.querySelector("[data-route-title]")!.textContent = copy.title;
+    panel.querySelector("[data-route-body]")!.textContent = copy.body;
+    const routeCta = panel.querySelector<HTMLAnchorElement>("[data-route-cta]")!;
+    routeCta.textContent = copy.cta;
+    routeCta.href = `/api/go?r=${saved.id}`;
+    const sent = panel.querySelector<HTMLElement>("[data-copy-sent]")!;
+    sent.hidden = !email;
+    if (email) sent.textContent = `Te llega una copia a ${email}.`;
+
+    // The full list repeats the worst finding, so the teaser goes.
+    finding.hidden = true;
+    unlockForm.hidden = true;
+    full.hidden = false;
   }
 
   async function save(raw: RawAnswers) {
@@ -441,10 +616,50 @@ const next = [
 
   back.addEventListener("click", () => show(current - 1));
 
+  function validateUnlock(): string {
+    const value = (name: string) => (unlockForm.elements.namedItem(name) as HTMLInputElement).value;
+    if (!validName(value("name"))) return "Pon tu nombre.";
+    if (!whatsappDigits(value("whatsapp"))) return "Pon tu WhatsApp con el código de tu país, por ejemplo 57 300 123 4567.";
+    if (emailOf(value("email")) === false) return "Revisa tu email, o déjalo vacío.";
+    if (!(unlockForm.elements.namedItem("consent") as HTMLInputElement).checked)
+      return "Marca la autorización para ver el resultado completo.";
+    return "";
+  }
+
+  unlockForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const message = validateUnlock();
+    unlockError.textContent = message;
+    if (message || !savedId) return;
+    const value = (name: string) => (unlockForm.elements.namedItem(name) as HTMLInputElement).value;
+    const button = unlockForm.querySelector<HTMLButtonElement>("button[type=submit]")!;
+    button.disabled = true;
+    try {
+      const res = await fetch("/api/unlock", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          id: savedId,
+          session,
+          consent: true,
+          contact: { name: value("name"), whatsapp: value("whatsapp"), email: value("email") },
+        }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      const saved = (await res.json()) as Saved;
+      if (saved.unlocked) renderFull(saved, emailOf(value("email")) || null);
+    } catch {
+      unlockError.textContent = "No pude guardar tus datos. Intenta de nuevo en un momento.";
+    } finally {
+      button.disabled = false;
+    }
+  });
+
   panel.querySelector("[data-restart]")!.addEventListener("click", () => {
     const url = new URL(location.href);
     url.searchParams.delete("r");
     history.replaceState(null, "", url);
+    savedId = null;
     result.hidden = true;
     form.hidden = false;
     show(0);
@@ -522,4 +737,33 @@ const next = [
   .finding { border-left: 3px solid var(--signal); padding: 4px 0 4px 14px; display: flex; flex-direction: column; gap: 6px; }
   .finding-title { font-family: var(--f-display); font-weight: 700; font-size: 17px; line-height: 1.3; }
   .finding-detail { color: var(--ink-2); font-size: 15px; }
+
+  .unlock, .full { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--rule); padding-top: 18px; }
+  .unlock-lede { color: var(--ink-2); font-size: 15.5px; }
+  .unlock .q { margin-top: 4px; margin-bottom: 0; font-size: 16px; }
+  .unlock .opt { font-weight: 400; color: var(--ink-3); }
+  .unit.phone input[type="text"] { max-width: none; }
+  .unit.phone span { font-size: 17px; color: var(--ink); }
+  .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; color: var(--ink-2); cursor: pointer; }
+  .consent input { margin-top: 3px; width: 18px; height: 18px; flex: none; accent-color: var(--signal); }
+  .consent a { color: var(--ink); text-decoration: underline; }
+  .unlock button[type="submit"] { align-self: flex-start; }
+  .unlock button[disabled] { opacity: .6; cursor: wait; }
+
+  .full { gap: 22px; }
+  .full-sec { display: flex; flex-direction: column; gap: 10px; }
+  /* Built by the script, so outside Astro's scoping. */
+  .full :global(.breakdown) { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .full :global(.breakdown + .breakdown) { margin-top: 12px; }
+  .full :global(.breakdown caption) { text-align: left; font-family: var(--f-display); font-weight: 700; font-size: 16px; padding-bottom: 6px; }
+  .full :global(.breakdown td) { padding: 7px 0; border-top: 1px solid var(--rule); color: var(--ink-2); vertical-align: top; }
+  .full :global(.breakdown td:last-child) { text-align: right; color: var(--ink); font-weight: 600; padding-left: 12px; }
+  .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .list :global(li) { border-left: 3px solid var(--signal); padding: 2px 0 2px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .list :global(.item-title) { font-family: var(--f-display); font-weight: 700; font-size: 16.5px; line-height: 1.3; }
+  .list :global(.item-body) { color: var(--ink-2); font-size: 15px; }
+  .route { background: var(--signal-wash); border-radius: 3px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .route-title { font-family: var(--f-display); font-weight: 800; font-size: 19px; line-height: 1.25; letter-spacing: -.015em; }
+  .route-body { color: var(--ink-2); font-size: 15.5px; }
+  .route .btn { align-self: flex-start; }
 </style>

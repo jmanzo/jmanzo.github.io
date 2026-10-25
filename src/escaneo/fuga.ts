@@ -137,6 +137,64 @@ export function fugaSummary(f: Fuga): string {
     : `${hours} y ${formatNumber(f.moneyPerMonth)} al mes en envíos que vuelven`;
 }
 
+const formatDecimal = (n: number) => new Intl.NumberFormat("es", { maximumFractionDigits: 1 }).format(n);
+
+/** The math behind the Fuga, line by line, shown after the unlock. */
+export function fugaBreakdown(a: Answers): { title: string; rows: [string, string][] }[] {
+  const f = computeFuga(a);
+  const sections = [
+    {
+      title: "Tiempo",
+      rows: [
+        [`${formatDecimal(a.hoursPerDay)} horas al día × ${DAYS} días`, `${formatNumber(f.hoursPerMonth)} horas al mes`],
+        [`${formatNumber(f.hoursPerMonth)} horas ÷ 8 horas por jornada`, `${formatNumber(Math.round(f.hoursPerMonth / 8))} jornadas al mes`],
+        ["En un año", `${formatNumber(f.hoursPerMonth * 12)} horas`],
+      ] as [string, string][],
+    },
+  ];
+  if (a.cod && f.moneyPerMonth !== null) {
+    const ordersPerMonth = f.ordersPerDay * DAYS;
+    const returned = Math.round((ordersPerMonth * a.cod.rejectedPerTen) / 10);
+    sections.push({
+      title: "Contraentrega",
+      rows: [
+        [`${formatNumber(f.ordersPerDay)} pedidos al día × ${DAYS} días`, `${formatNumber(ordersPerMonth)} pedidos al mes`],
+        [`${a.cod.rejectedPerTen} de cada 10 rechazados`, `${formatNumber(returned)} envíos que vuelven`],
+        [`${formatNumber(returned)} × ${formatNumber(a.cod.returnCost)} por envío`, `${formatNumber(f.moneyPerMonth)} al mes`],
+        ["En un año", formatNumber(f.moneyPerMonth * 12)],
+      ],
+    });
+  }
+  return sections;
+}
+
+/** The plan de Arreglos: the product modules that apply to how the merchant gets paid. */
+export function arreglos(a: Pick<Answers, "payments">): { title: string; body: string }[] {
+  const plan = [];
+  if (a.payments.includes("cod"))
+    plan.push({
+      title: "Contraentrega",
+      body: "Cada pedido nuevo le llega al cliente por WhatsApp con botones para confirmar o cancelar. Tú solo ves los que necesitan a una persona.",
+    });
+  if (a.payments.includes("proof") || a.payments.includes("wallet"))
+    plan.push({
+      title: "Comprobantes",
+      body: "El comprobante se lee solo, se cruza con el pedido y te aviso si el monto o la referencia no cuadran.",
+    });
+  plan.push({
+    title: "Sincronización de pedidos",
+    body: "El pedido confirmado pasa solo a Dropi o a tu transportadora con su guía, y el cliente recibe el tracking sin que nadie se lo mande.",
+  });
+  return plan;
+}
+
+/** What the lead asks Jean for, by route (lead-magnets.md, "Ruta de cada lead"). */
+export const ROUTE_ASK: Record<Route, string> = {
+  comprobacion: "Quiero mi Comprobación.",
+  email: "Quiero saber qué arreglarías primero en mi tienda.",
+  espera: "Quiero pasar mi tienda a Shopify.",
+};
+
 /** The message prefilled in Jean's WhatsApp. The result ID lets him open it. */
-export const ctaText = (a: Answers, id?: string) =>
-  `Hola Jean, hice el Escaneo de operar a mano para ${storeLabel(a.store)}${id ? ` (resultado ${id})` : ""}. Me sale que se me van ${fugaSummary(computeFuga(a))}. Quiero mi Comprobación.`;
+export const ctaText = (a: Answers, id?: string, route: Route = "comprobacion") =>
+  `Hola Jean, hice el Escaneo de operar a mano para ${storeLabel(a.store)}${id ? ` (resultado ${id})` : ""}. Me sale que se me van ${fugaSummary(computeFuga(a))}. ${ROUTE_ASK[route]}`;
