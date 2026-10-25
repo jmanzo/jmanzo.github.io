@@ -1,42 +1,44 @@
 {
-  // The Astro build output, plus a script for /api/* (the Escaneo's server side).
-  // Cloudflare dashboard, Settings → Build:
-  //   Build command:  pnpm run build
-  //   Deploy command: npx wrangler deploy
-  //   Root directory: empty (the repo root)
-  "name": "jeanmanzo",
-  "compatibility_date": "2026-09-19",
-  "main": "./worker/index.ts",
-
-  "assets": {
-    // Astro writes the finished site here. _headers and _redirects are copied
-    // in from public/, so they land next to the pages they apply to.
-    "directory": "./dist",
-    "binding": "ASSETS",
-
-    // Only /api/* runs the script. Every other path is served from assets
-    // without invoking it, so the site costs no Worker requests.
-    "run_worker_first": ["/api/*"],
-
-    // Astro emits folders (/about/index.html) and links to them with a
-    // trailing slash. The default handling already serves /about/ and
-    // redirects /about to it, so it is left as is.
-    "html_handling": "auto-trailing-slash",
-
-    // Unknown paths get dist/404.html with a real 404 status.
-    "not_found_handling": "404-page"
-  },
-
-  // Escaneo results (?r=<id>) and funnel events. Schema in worker/migrations.
-  // Local dev works with the placeholder ID. Before the first deploy:
-  //   npx wrangler d1 create escaneo   → paste the database_id here
-  //   npx wrangler d1 migrations apply escaneo --remote
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "escaneo",
-      "database_id": "00000000-0000-0000-0000-000000000000",
-      "migrations_dir": "./worker/migrations"
-    }
-  ]
+	// The Astro build output, plus a script for /api/* (the Escaneo's server side).
+	// Cloudflare dashboard, Settings → Build:
+	//   Build command:  pnpm run build
+	//   Deploy command: npx wrangler deploy
+	//   Root directory: empty (the repo root)
+	"name": "jeanmanzo",
+	"compatibility_date": "2026-09-19",
+	"main": "./worker/index.ts",
+	"assets": {
+		// Astro writes the finished site here. _headers and _redirects are copied
+		// in from public/, so they land next to the pages they apply to.
+		"directory": "./dist",
+		"binding": "ASSETS",
+		// Only /api/* runs the script. Every other path is served from assets
+		// without invoking it, so the site costs no Worker requests.
+		"run_worker_first": [
+			"/api/*"
+		],
+		// Astro emits folders (/about/index.html) and links to them with a
+		// trailing slash. The default handling already serves /about/ and
+		// redirects /about to it, so it is left as is.
+		"html_handling": "auto-trailing-slash",
+		// Unknown paths get dist/404.html with a real 404 status.
+		"not_found_handling": "404-page"
+	},
+	// Escaneo results (?r=<id>) and funnel events. Schema in worker/migrations.
+	// Local dev works with the placeholder ID. Before the first deploy:
+	//   npx wrangler d1 create escaneo   → paste the database_id here
+	//   npx wrangler d1 migrations apply escaneo --remote
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "escaneo",
+			"database_id": "1234990c-d581-4cb8-aa34-f98b7b3eec2d",
+			"migrations_dir": "./worker/migrations"
+		},
+		{
+			"binding": "escaneo",
+			"database_name": "escaneo",
+			"database_id": "1234990c-d581-4cb8-aa34-f98b7b3eec2d"
+		}
+	]
 }
