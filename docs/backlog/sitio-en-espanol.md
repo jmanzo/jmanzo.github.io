@@ -4,17 +4,18 @@
 
 ## Contexto
 
-Los prospectos de DTC-LatAm llegan por WhatsApp a un lead magnet en español. Si pasan de ahí a páginas en inglés, se rompe la confianza. Para no frenar la venta, la versión 1 solo cubre un carril mínimo en español (decidido el 24/10/2026):
+Los prospectos de DTC-LatAm llegan por WhatsApp a un lead magnet en español. Si pasan de ahí a páginas en inglés, se rompe la confianza. Para no frenar la venta, la versión 1 solo cubre un carril mínimo en español (decidido el 24/10/2026 y recortado el 25/10/2026):
 
-- El lead magnet y su página de resultado.
-- `/es/`: inicio con 2 o 3 pruebas (Marlies Dekkers, Nuflorist y Duilify en la App Store).
-- Un "sobre mí" corto.
+- El lead magnet y su página de resultado, con las pruebas y un "sobre mí" corto dentro de la misma página.
+- `/es/privacidad/`.
 - El header de ese carril solo enlaza a páginas en español.
 
 La estructura i18n de Astro queda montada en la versión 1. Este ticket cubre todo lo demás.
 
 ## Alcance
 
+- [ ] `/es/`: inicio con 2 o 3 pruebas (Marlies Dekkers, Nuflorist y Duilify en la App Store).
+- [ ] `/es/sobre-mi/` como página propia.
 - [ ] Traducir y adaptar `/projects/` y cada proyecto.
 - [ ] Traducir `/work/` y cada case study.
 - [ ] Traducir los posts que se usen en el outreach, empezando por los del backlog de lead magnets (`docs/backlog/lead-magnets.md`).

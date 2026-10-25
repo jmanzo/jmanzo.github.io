@@ -37,5 +37,13 @@ La verificación humana de un hallazgo en la tienda real, que termina en una pru
 _Avoid_: Revisión, video personalizado
 
 **Arreglo**:
-El trabajo pagado que cierra una fuga, con fecha de entrega y garantía.
+El trabajo pagado que cierra una fuga, con fecha de entrega y garantía. En el producto de operación, es el setup pagado de un módulo.
 _Avoid_: Fix gratis, servicio
+
+**Módulo**:
+Una automatización del producto de operación que cierra un proceso manual completo, por ejemplo confirmar pedidos contraentrega, revisar comprobantes o pasar pedidos a la transportadora.
+_Avoid_: Feature, agente, bot
+
+**Plan**:
+Lo que el merchant paga cada mes para que sus módulos sigan funcionando, con soporte y reporte.
+_Avoid_: Suscripción, mantenimiento, retainer
