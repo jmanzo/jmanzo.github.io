@@ -10,7 +10,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "migrate:wp": "node scripts/migrate-wp.mjs"
+    "migrate:wp": "node scripts/migrate-wp.mjs",
+    "test": "node --test \"src/**/*.test.ts\""
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.4",
