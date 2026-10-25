@@ -96,3 +96,47 @@ export function routeLead(a: Pick<Answers, "orders">, platform: Platform): Route
   if (!qualifies) return "email";
   return platform === "shopify" ? "comprobacion" : "espera";
 }
+
+/** What the page sends the Worker: the raw answers, with the store as typed. */
+export type RawAnswers = Omit<Answers, "store"> & { store: string };
+
+/** Checks answers that come from outside (the Worker gets them from the page). */
+export function parseAnswers(raw: unknown): Answers | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const store = typeof r.store === "string" ? parseStore(r.store) : null;
+  const orders = ORDER_BANDS.find((b) => b.id === r.orders)?.id;
+  const payments = Array.isArray(r.payments)
+    ? [...new Set(PAYMENT_METHODS.map((m) => m.id).filter((id) => (r.payments as unknown[]).includes(id)))]
+    : [];
+  const hoursPerDay = Number(r.hoursPerDay);
+  if (!store || !orders || !payments.length || !(hoursPerDay > 0 && hoursPerDay <= 24)) return null;
+
+  let cod: Answers["cod"];
+  if (payments.includes("cod")) {
+    const c = (r.cod ?? {}) as Record<string, unknown>;
+    const rejectedPerTen = Number(c.rejectedPerTen);
+    const returnCost = Number(c.returnCost);
+    if (!Number.isInteger(rejectedPerTen) || rejectedPerTen < 0 || rejectedPerTen > 10) return null;
+    if (!(returnCost > 0 && returnCost < 1e10)) return null;
+    cod = { rejectedPerTen, returnCost };
+  }
+  return { store, orders, payments, hoursPerDay, cod };
+}
+
+export const formatNumber = (n: number) =>
+  new Intl.NumberFormat("es", { maximumFractionDigits: 0, useGrouping: "always" } as Intl.NumberFormatOptions).format(n);
+
+export const storeLabel = (s: Store) => (s.kind === "url" ? s.host : `@${s.handle}`);
+
+/** "75 horas al mes", plus the money when there is COD. */
+export function fugaSummary(f: Fuga): string {
+  const hours = `${formatNumber(f.hoursPerMonth)} horas`;
+  return f.moneyPerMonth === null
+    ? `${hours} al mes`
+    : `${hours} y ${formatNumber(f.moneyPerMonth)} al mes en envíos que vuelven`;
+}
+
+/** The message prefilled in Jean's WhatsApp. The result ID lets him open it. */
+export const ctaText = (a: Answers, id?: string) =>
+  `Hola Jean, hice el Escaneo de operar a mano para ${storeLabel(a.store)}${id ? ` (resultado ${id})` : ""}. Me sale que se me van ${fugaSummary(computeFuga(a))}. Quiero mi Comprobación.`;

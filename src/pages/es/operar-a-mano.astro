@@ -4,9 +4,11 @@ import Years from "../../components/Years.astro";
 import { CAREER, CONTACT } from "../../consts";
 import { ORDER_BANDS, PAYMENT_METHODS } from "../../escaneo/fuga";
 
-// Lead magnet 1 (docs/backlog/plan-escaneo-operar-a-mano.md). Everything runs
-// in the browser for now. The Worker adds the store scan, saved results
-// (?r=<id>) and funnel events; the unlock replaces the interim CTA.
+// Lead magnet 1 (docs/backlog/plan-escaneo-operar-a-mano.md). The Fuga is
+// computed in the browser so it shows at once; the Worker (worker/index.ts)
+// reads the store, saves the result at ?r=<id> and logs the funnel. If the
+// Worker is down, the result still shows and the CTA goes straight to
+// WhatsApp. The unlock replaces the interim CTA.
 
 const proofs = [
   {
@@ -167,6 +169,12 @@ const next = [
           <p class="fuga-money" data-money hidden></p>
           <p class="fuga-basis" data-basis></p>
           <p class="hint">Calculado solo con tus respuestas, sin promedios del mercado.</p>
+          <p class="hint" data-reading hidden>Revisando tu tienda…</p>
+          <div class="finding" data-finding hidden>
+            <p class="lab">Lo que encontré en tu tienda</p>
+            <p class="finding-title" data-finding-title></p>
+            <p class="finding-detail" data-finding-detail></p>
+          </div>
           <div class="cta-row">
             <a class="btn btn-a" data-cta target="_blank" rel="noopener">
               Quiero ver cómo recuperarlo
@@ -239,17 +247,25 @@ const next = [
 <script>
   import {
     computeFuga,
+    ctaText,
+    formatNumber as fmt,
     parseChannel,
     parseStore,
     type Answers,
+    type Fuga,
     type OrderBand,
     type PaymentMethod,
+    type RawAnswers,
   } from "../../escaneo/fuga";
+  import type { Finding } from "../../escaneo/hallazgos";
 
   const { whatsapp, email } = (window as any).__escaneoContact as {
     whatsapp: string;
     email: string;
   };
+
+  /** What /api/scan and /api/result return (worker/index.ts, publicResult). */
+  type Saved = { id: string; answers: Answers; fuga: Fuga; finding: Finding | null };
 
   const panel = document.getElementById("escaneo")!;
   const form = panel.querySelector<HTMLFormElement>("[data-scan]")!;
@@ -258,10 +274,33 @@ const next = [
   const error = panel.querySelector<HTMLElement>("[data-error]")!;
   const back = panel.querySelector<HTMLButtonElement>("[data-back]")!;
   const nextBtn = panel.querySelector<HTMLButtonElement>("[data-next]")!;
+  const reading = panel.querySelector<HTMLElement>("[data-reading]")!;
+  const finding = panel.querySelector<HTMLElement>("[data-finding]")!;
+  const cta = panel.querySelector<HTMLAnchorElement>("[data-cta]")!;
   const steps = [...form.querySelectorAll<HTMLFieldSetElement>("[data-step]")];
 
-  const channel = parseChannel(new URLSearchParams(location.search).get("c"));
-  void channel; // Sent with the funnel events once the Worker exists.
+  const params = new URLSearchParams(location.search);
+  const channel = parseChannel(params.get("c"));
+
+  // Ties this visit's funnel events together. Not stored anywhere else.
+  const session = (() => {
+    try {
+      const saved = sessionStorage.getItem("escaneo-session");
+      if (saved) return saved;
+      const fresh = crypto.randomUUID();
+      sessionStorage.setItem("escaneo-session", fresh);
+      return fresh;
+    } catch {
+      return crypto.randomUUID();
+    }
+  })();
+
+  function track(type: "view" | "answer", step?: string) {
+    const body = JSON.stringify({ type, step, session, channel });
+    // sendBeacon survives the merchant closing the tab mid-question.
+    if (!navigator.sendBeacon?.("/api/event", new Blob([body], { type: "application/json" })))
+      fetch("/api/event", { method: "POST", body, keepalive: true }).catch(() => {});
+  }
 
   const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement;
   const checked = (name: string) =>
@@ -270,8 +309,6 @@ const next = [
     );
   const number = (raw: string) => Number(raw.replace(",", ".").replace(/[^\d.]/g, ""));
   const money = (raw: string) => Number(raw.replace(/\D/g, ""));
-  const fmt = (n: number) =>
-    new Intl.NumberFormat("es", { maximumFractionDigits: 0, useGrouping: "always" } as Intl.NumberFormatOptions).format(n);
 
   const hasCod = () => checked("payments").includes("cod");
   // The COD step only exists for merchants who sell contraentrega.
@@ -310,9 +347,9 @@ const next = [
     return "";
   }
 
-  function answers(): Answers {
+  function rawAnswers(): RawAnswers {
     return {
-      store: parseStore(field("store").value)!,
+      store: field("store").value,
       orders: checked("orders")[0] as OrderBand,
       payments: checked("payments") as PaymentMethod[],
       hoursPerDay: number(field("hours").value),
@@ -322,10 +359,16 @@ const next = [
     };
   }
 
+  function directCta(a: Answers) {
+    const text = ctaText(a);
+    return whatsapp
+      ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(text)}`
+      : `mailto:${email}?subject=${encodeURIComponent("Quiero mi Comprobación")}&body=${encodeURIComponent(text)}`;
+  }
+
   function render(a: Answers) {
     const f = computeFuga(a);
-    const hours = `${fmt(f.hoursPerMonth)} horas`;
-    panel.querySelector("[data-headline]")!.textContent = `${hours} al mes`;
+    panel.querySelector("[data-headline]")!.textContent = `${fmt(f.hoursPerMonth)} horas al mes`;
     const moneyLine = panel.querySelector<HTMLElement>("[data-money]")!;
     moneyLine.hidden = f.moneyPerMonth === null;
     if (f.moneyPerMonth !== null)
@@ -335,31 +378,59 @@ const next = [
     if (a.cod) basis.push(`${a.cod.rejectedPerTen} de cada 10 rechazados a ${fmt(a.cod.returnCost)} cada envío`);
     panel.querySelector("[data-basis]")!.textContent = `Con ${basis.join(", ")}.`;
 
-    const store = a.store.kind === "url" ? a.store.host : `@${a.store.handle}`;
-    const summary =
-      f.moneyPerMonth === null
-        ? `${hours} al mes`
-        : `${hours} y ${fmt(f.moneyPerMonth)} al mes en envíos que vuelven`;
-    const text = `Hola Jean, hice el Escaneo de operar a mano para ${store}. Me sale que se me van ${summary}. Quiero mi Comprobación.`;
-    panel.querySelector<HTMLAnchorElement>("[data-cta]")!.href = whatsapp
-      ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(text)}`
-      : `mailto:${email}?subject=${encodeURIComponent("Quiero mi Comprobación")}&body=${encodeURIComponent(text)}`;
-
+    cta.href = directCta(a);
+    finding.hidden = true;
     form.hidden = true;
     result.hidden = false;
     progress.textContent = "Resultado";
   }
 
+  /** Adds what only the Worker knows: the store finding and the saved result's link. */
+  function renderSaved(saved: Saved) {
+    if (saved.finding) {
+      panel.querySelector("[data-finding-title]")!.textContent = saved.finding.title;
+      panel.querySelector("[data-finding-detail]")!.textContent = saved.finding.detail;
+      finding.hidden = false;
+    }
+    cta.href = `/api/go?r=${saved.id}`;
+    const url = new URL(location.href);
+    url.searchParams.set("r", saved.id);
+    history.replaceState(null, "", url);
+  }
+
+  async function save(raw: RawAnswers) {
+    reading.hidden = false;
+    try {
+      const res = await fetch("/api/scan", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ answers: raw, session, channel }),
+      });
+      if (res.ok) renderSaved(await res.json());
+    } catch {
+      // The local result and the direct CTA already work without the Worker.
+    } finally {
+      reading.hidden = true;
+    }
+  }
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const active = activeSteps();
-    const message = validate(active[current].dataset.step!);
+    const step = active[current].dataset.step!;
+    const message = validate(step);
     if (message) {
       error.textContent = message;
       return;
     }
-    if (current < active.length - 1) show(current + 1);
-    else render(answers());
+    track("answer", step);
+    if (current < active.length - 1) {
+      show(current + 1);
+      return;
+    }
+    const raw = rawAnswers();
+    render({ ...raw, store: parseStore(raw.store)! });
+    save(raw);
   });
 
   // A single-choice tap is the answer: move on without a second tap.
@@ -371,13 +442,31 @@ const next = [
   back.addEventListener("click", () => show(current - 1));
 
   panel.querySelector("[data-restart]")!.addEventListener("click", () => {
+    const url = new URL(location.href);
+    url.searchParams.delete("r");
+    history.replaceState(null, "", url);
     result.hidden = true;
     form.hidden = false;
     show(0);
   });
 
-  form.hidden = false;
-  show(0);
+  function start() {
+    form.hidden = false;
+    show(0);
+    track("view");
+  }
+
+  // ?r=<id> opens a saved result; anything else starts the questions.
+  const id = params.get("r");
+  if (id && /^[a-z0-9]{10}$/.test(id)) {
+    fetch(`/api/result?id=${id}`)
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((saved: Saved) => {
+        render(saved.answers);
+        renderSaved(saved);
+      })
+      .catch(start);
+  } else start();
 </script>
 
 <style>
@@ -430,4 +519,7 @@ const next = [
   .fuga-money { font-family: var(--f-display); font-weight: 700; font-size: 21px; line-height: 1.25; letter-spacing: -.015em; }
   .fuga-basis { color: var(--ink-2); font-size: 15.5px; }
   .scan .cta-row { margin-top: 6px; }
+  .finding { border-left: 3px solid var(--signal); padding: 4px 0 4px 14px; display: flex; flex-direction: column; gap: 6px; }
+  .finding-title { font-family: var(--f-display); font-weight: 700; font-size: 17px; line-height: 1.3; }
+  .finding-detail { color: var(--ink-2); font-size: 15px; }
 </style>

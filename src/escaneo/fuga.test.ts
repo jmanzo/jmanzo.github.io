@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { computeFuga, parseChannel, parseStore, routeLead } from "./fuga.ts";
+import { computeFuga, ctaText, parseAnswers, parseChannel, parseStore, routeLead } from "./fuga.ts";
 
 test("parseStore accepts a bare domain, a full URL and an Instagram handle", () => {
   assert.deepEqual(parseStore("Tienda.com"), { kind: "url", url: "https://tienda.com", host: "tienda.com" });
@@ -49,4 +49,29 @@ test("parseChannel keeps only known channels", () => {
   assert.equal(parseChannel("wa"), "wa");
   assert.equal(parseChannel("facebook"), null);
   assert.equal(parseChannel(null), null);
+});
+
+test("parseAnswers rejects what the form would never send", () => {
+  const ok = { store: "tienda.com", orders: "10-24", payments: ["cod", "x"], hoursPerDay: 3, cod: { rejectedPerTen: 2, returnCost: 9000 } };
+  assert.deepEqual(parseAnswers(ok), {
+    store: { kind: "url", url: "https://tienda.com", host: "tienda.com" },
+    orders: "10-24",
+    payments: ["cod"],
+    hoursPerDay: 3,
+    cod: { rejectedPerTen: 2, returnCost: 9000 },
+  });
+  assert.equal(parseAnswers({ ...ok, orders: "100" }), null);
+  assert.equal(parseAnswers({ ...ok, hoursPerDay: 30 }), null);
+  assert.equal(parseAnswers({ ...ok, cod: { rejectedPerTen: 11, returnCost: 9000 } }), null);
+  assert.equal(parseAnswers({ ...ok, payments: ["card"], cod: undefined })?.cod, undefined);
+  assert.equal(parseAnswers("nope"), null);
+});
+
+test("ctaText carries the result ID only when there is one", () => {
+  const a = parseAnswers({ store: "@tienda", orders: "5-9", payments: ["card"], hoursPerDay: 1 })!;
+  assert.equal(
+    ctaText(a, "abc123"),
+    "Hola Jean, hice el Escaneo de operar a mano para @tienda (resultado abc123). Me sale que se me van 30 horas al mes. Quiero mi Comprobación.",
+  );
+  assert.ok(!ctaText(a).includes("resultado"));
 });

@@ -11,7 +11,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "migrate:wp": "node scripts/migrate-wp.mjs",
-    "test": "node --test \"src/**/*.test.ts\""
+    "test": "node --test \"src/**/*.test.ts\"",
+    "worker:dev": "astro build && wrangler d1 migrations apply escaneo --local && wrangler dev"
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.4",
@@ -22,8 +23,10 @@
   },
   "packageManager": "pnpm@10.30.2",
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261025.1",
     "@types/turndown": "^5.0.6",
-    "turndown": "^7.2.4"
+    "turndown": "^7.2.4",
+    "wrangler": "^4.152.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
