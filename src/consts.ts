@@ -33,9 +33,9 @@ export const CONTACT = {
   email: "jdevmanzo@gmail.com",
   /**
    * Jean's WhatsApp, digits only with the country code (wa.me format).
-   * Empty until set: the Escaneo's CTA falls back to email.
+   * If emptied, the Escaneo's CTA falls back to email.
    */
-  whatsapp: "",
+  whatsapp: "573505786124",
 } as const;
 
 export const SOCIAL_ICONS = ["github", "linkedin", "x"] as const;
