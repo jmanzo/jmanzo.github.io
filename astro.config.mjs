@@ -7,6 +7,12 @@ import rehypeExternalLinks from './src/plugins/rehype-external-links.mjs';
 export default defineConfig({
   site: 'https://jeanmanzo.com',
   integrations: [mdx(), sitemap()],
+  // English stays at the root. Spanish lives under /es/ (src/pages/es/).
+  i18n: {
+    locales: ['en', 'es'],
+    defaultLocale: 'en',
+    routing: { prefixDefaultLocale: false },
+  },
   markdown: {
     rehypePlugins: [[rehypeExternalLinks, { siteHost: 'jeanmanzo.com' }]],
     shikiConfig: {

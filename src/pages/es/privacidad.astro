@@ -1,0 +1,113 @@
+---
+import Base from "../../layouts/Base.astro";
+import PageHead from "../../components/PageHead.astro";
+import { CONTACT, SITE } from "../../consts";
+
+// Política de tratamiento de datos (Ley 1581 de 2012 y Decreto 1377 de 2013).
+// El checkbox de autorización del Escaneo enlaza aquí: si cambia lo que se
+// recoge o quién lo procesa, se actualiza esta página y su fecha.
+const updated = "25 de octubre de 2026";
+---
+
+<Base
+  title="Privacidad"
+  description="Qué datos recoge el Escaneo de jeanmanzo.com, para qué se usan, quién más los procesa y cómo pedir que los corrijan o los borren."
+>
+  <PageHead
+    eyebrow={`Privacidad · Actualizada el ${updated}`}
+    title="Tus datos, en simple."
+    lede="Qué guardo cuando usas el Escaneo, para qué, y cómo pedir que lo borre."
+  />
+
+  <div class="wrap article">
+    <div class="prose article-body">
+      <h2>Quién es el responsable</h2>
+      <p>
+        {SITE.author}, desarrollador independiente con domicilio en {SITE.location}. Para cualquier
+        pregunta o solicitud sobre tus datos, escríbeme a{" "}
+        <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>.
+      </p>
+
+      <h2>Qué datos recojo</h2>
+      <ul>
+        <li>
+          <strong>Lo que escribes en el Escaneo:</strong> la URL de tu tienda o tu @ de Instagram,
+          cuántos pedidos tienes por día, cómo te pagan tus clientes, cuántas horas se te van en
+          tareas manuales y, si vendes contraentrega, tus rechazos y el costo de un envío que vuelve.
+        </li>
+        <li>
+          <strong>Lo que es público en tu tienda:</strong> el Escaneo lee la página de inicio y el
+          catálogo público de tu tienda, igual que lo haría un visitante.
+        </li>
+        <li>
+          <strong>Tus datos de contacto, si desbloqueas el resultado:</strong> nombre, WhatsApp y,
+          si quieres, email.
+        </li>
+        <li>
+          <strong>Uso del Escaneo:</strong> en qué paso vas y de qué canal llegaste, sin tu nombre
+          ni tu número. La analítica de visitas de Cloudflare no usa cookies.
+        </li>
+      </ul>
+      <p>No pido datos de tarjetas, contraseñas ni acceso a tu tienda.</p>
+
+      <h2>Para qué los uso</h2>
+      <ul>
+        <li>Calcular y guardar tu resultado, para que puedas volver a verlo con su enlace.</li>
+        <li>Enviarte el resultado completo por email, si me lo diste.</li>
+        <li>
+          Escribirte por WhatsApp o email sobre tu resultado y ofrecerte servicios relacionados:
+          automatización de pedidos, desarrollo en Shopify y mejoras de conversión.
+        </li>
+        <li>Medir, en conjunto, qué partes del Escaneo funcionan y cuáles no.</li>
+      </ul>
+      <p>No vendo ni cedo tus datos a nadie.</p>
+
+      <h2>Quién más los procesa</h2>
+      <p>
+        Uso tres servicios que procesan los datos por encargo mío, y que pueden guardarlos fuera de
+        tu país:
+      </p>
+      <ul>
+        <li><strong>Cloudflare:</strong> aloja el sitio y guarda los resultados.</li>
+        <li><strong>Klaviyo:</strong> guarda tu contacto y envía los emails.</li>
+        <li><strong>Telegram:</strong> me avisa cuando alguien completa un Escaneo.</li>
+      </ul>
+
+      <h2>Tu autorización</h2>
+      <p>
+        Al marcar la casilla de autorización del Escaneo, aceptas que trate tus datos como dice esta
+        página, incluido que se guarden con los servicios de arriba. Sin esa casilla no se guarda tu
+        contacto.
+      </p>
+
+      <h2>Tus derechos</h2>
+      <p>Puedes, en cualquier momento y sin costo:</p>
+      <ul>
+        <li>Saber qué datos tuyos tengo y cómo los uso.</li>
+        <li>Corregirlos o actualizarlos.</li>
+        <li>Pedir prueba de tu autorización.</li>
+        <li>Retirar tu autorización y pedir que los borre.</li>
+        <li>
+          Presentar una queja ante la Superintendencia de Industria y Comercio de Colombia, después
+          de haberme escrito.
+        </li>
+      </ul>
+      <p>
+        Para hacerlo, escríbeme a <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>, o
+        responde "borrar mis datos" a cualquier mensaje mío por WhatsApp. Respondo las consultas en
+        un máximo de 10 días hábiles y los reclamos en un máximo de 15.
+      </p>
+
+      <h2>Cuánto tiempo los guardo</h2>
+      <p>
+        Hasta 24 meses desde nuestro último contacto, o menos si me pides que los borre antes.
+      </p>
+
+      <h2>Cambios</h2>
+      <p>
+        Si cambia algo de esta política, la actualizo en esta misma página con su nueva fecha. Esta
+        versión rige desde el {updated}.
+      </p>
+    </div>
+  </div>
+</Base>

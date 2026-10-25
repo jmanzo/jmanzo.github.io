@@ -3,6 +3,7 @@ import "../styles/global.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { SITE, SOCIALS } from "../consts";
+import { UI, langOf } from "../i18n";
 
 interface Props {
   title?: string;
@@ -12,17 +13,20 @@ interface Props {
   ogImageAlt?: string;
 }
 
+const lang = langOf(Astro.currentLocale);
+const ui = UI[lang];
+
 const {
   title,
-  description = SITE.description,
+  description = ui.description,
   ogType = "website",
   ogImage = "/og.png",
-  ogImageAlt = `${SITE.author}, ${SITE.role}`,
+  ogImageAlt = `${SITE.author}, ${ui.role}`,
 } = Astro.props;
 
 const fullTitle = title
   ? `${title} · ${SITE.author}`
-  : `${SITE.author} · ${SITE.role}`;
+  : `${SITE.author} · ${ui.role}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 const ogImageUrl = new URL(ogImage, Astro.site).toString();
 const isDefaultOgImage = ogImage === "/og.png";
@@ -72,7 +76,7 @@ const siteJsonLd = {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -82,12 +86,11 @@ const siteJsonLd = {
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="canonical" href={canonical} />
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title={SITE.title}
-      href="/rss.xml"
-    />
+    {
+      lang === "en" && (
+        <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
+      )
+    }
 
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
@@ -97,6 +100,7 @@ const siteJsonLd = {
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={SITE.title} />
+    <meta property="og:locale" content={ui.ogLocale} />
     <meta property="og:image" content={ogImageUrl} />
     {
       isDefaultOgImage && (
@@ -121,11 +125,11 @@ const siteJsonLd = {
     />
   </head>
   <body>
-    <Header />
+    <Header lang={lang} />
     <main id="top">
       <slot />
     </main>
-    <Footer />
+    <Footer lang={lang} />
     <script is:inline>
       // Keeps every <Years> count current between deploys.
       document.querySelectorAll("[data-years-since]").forEach(function (el) {

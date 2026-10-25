@@ -29,6 +29,8 @@ export const SITE = {
 export const CONTACT = {
   bookingUrl: "https://calendly.com/jdevmanzo-1/30min",
   bookingLabel: "Book a 30-min call",
+  /** Where data requests under the Spanish privacy policy go. */
+  email: "jdevmanzo@gmail.com",
 } as const;
 
 export const SOCIAL_ICONS = ["github", "linkedin", "x"] as const;

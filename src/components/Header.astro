@@ -1,22 +1,30 @@
 ---
-import { NAV, SITE } from "../consts";
+import { SITE } from "../consts";
+import { UI, type Lang } from "../i18n";
 
+interface Props {
+  lang: Lang;
+}
+
+const ui = UI[Astro.props.lang];
 const pathname = Astro.url.pathname;
 const isActive = (href: string) => pathname.startsWith(href);
 ---
 
 <header class="nav">
   <div class="wrap">
-    <a class="brand" href="/">{SITE.author}<span>.</span></a>
-    <nav class="nav-links" aria-label="Main">
-      {
-        NAV.map((item) => (
-          <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>
-            {item.label}
-          </a>
-        ))
-      }
-    </nav>
-    <a class="btn btn-a" href="#contact">Get in touch</a>
+    <a class="brand" href={ui.home}>{SITE.author}<span>.</span></a>
+    {
+      ui.nav.length > 0 && (
+        <nav class="nav-links" aria-label="Main">
+          {ui.nav.map((item) => (
+            <a href={item.href} aria-current={isActive(item.href) ? "page" : undefined}>
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      )
+    }
+    <a class="btn btn-a" href={ui.cta.href}>{ui.cta.label}</a>
   </div>
 </header>

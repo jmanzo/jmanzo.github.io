@@ -1,13 +1,21 @@
 ---
 import { SOCIALS, SITE } from "../consts";
+import { UI, type Lang } from "../i18n";
 import SocialIcon from "./SocialIcon.astro";
+
+interface Props {
+  lang: Lang;
+}
+
+const ui = UI[Astro.props.lang];
 const year = new Date().getFullYear();
 ---
 
 <footer>
   <div class="wrap">
-    <span>© {year} {SITE.author} · {SITE.role} · {SITE.location}</span>
-    <nav aria-label="Elsewhere">
+    <span>© {year} {SITE.author} · {ui.role} · {SITE.location}</span>
+    <nav aria-label={Astro.props.lang === "es" ? "Enlaces" : "Elsewhere"}>
+      {ui.footerLinks.map((l) => <a href={l.href}>{l.label}</a>)}
       {
         SOCIALS.map((s) => (
           <a href={s.href} target="_blank" rel="noopener noreferrer">
