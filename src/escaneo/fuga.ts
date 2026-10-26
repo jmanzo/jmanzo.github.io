@@ -188,6 +188,51 @@ export function arreglos(a: Pick<Answers, "payments">): { title: string; body: s
   return plan;
 }
 
+/** The Fuga's headline, as the result and the email show it. */
+export function fugaHeadline(a: Answers): { hours: string; money: string | null; basis: string } {
+  const f = computeFuga(a);
+  const basis = [`${formatNumber(f.ordersPerDay)} pedidos por día`, `${formatDecimal(a.hoursPerDay)} horas diarias`];
+  if (a.cod) basis.push(`${a.cod.rejectedPerTen} de cada 10 rechazados a ${formatNumber(a.cod.returnCost)} cada envío`);
+  return {
+    hours: `${formatNumber(f.hoursPerMonth)} horas al mes`,
+    money: f.moneyPerMonth === null ? null : `y ${formatNumber(f.moneyPerMonth)} al mes en envíos que vuelven`,
+    basis: `Con ${basis.join(", ")}.`,
+  };
+}
+
+/** Shown instead of the findings when there are none. */
+export const noFindingsText = (platform: Platform) =>
+  platform === "none"
+    ? "Con un @ de Instagram no hay tienda que revisar desde fuera. La Comprobación mira tu WhatsApp de ventas."
+    : "No encontré problemas desde fuera. La Comprobación revisa lo que solo se ve por dentro.";
+
+/** The route's offer (lead-magnets.md, "Ruta de cada lead"). The price never shows. */
+export function routeCopy(route: Route, platform: Platform): { title: string; body: string; cta: string } {
+  switch (route) {
+    case "comprobacion":
+      return {
+        title: "Tu tienda califica para la Comprobación",
+        body: "Pruebo cuánto tarda en responder tu WhatsApp de ventas y te mando una demo con tus productos. Es gratis y no tienes que instalar nada.",
+        cta: "Quiero mi Comprobación",
+      };
+    case "email":
+      return {
+        title: "Con tu volumen, lo que más te mueve ahora es vender más",
+        body: "Puedo revisar tu tienda y decirte qué arreglaría primero para que te compren más.",
+        cta: "Quiero saber qué arreglar primero",
+      };
+    case "espera":
+      return {
+        title: "Por ahora esto funciona solo con Shopify",
+        body:
+          platform === "none"
+            ? "Te anoté en la lista de espera para cuando funcione con ventas por Instagram. Si lo quieres antes, puedo montarte la tienda en Shopify."
+            : "Te anoté en la lista de espera para cuando funcione con tu plataforma. Si lo quieres antes, puedo migrar tu tienda a Shopify.",
+        cta: "Quiero pasar a Shopify",
+      };
+  }
+}
+
 /** What the lead asks Jean for, by route (lead-magnets.md, "Ruta de cada lead"). */
 export const ROUTE_ASK: Record<Route, string> = {
   comprobacion: "Quiero mi Comprobación.",

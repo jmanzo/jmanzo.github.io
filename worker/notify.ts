@@ -5,7 +5,9 @@
  * failure here never blocks the merchant; it only shows in the Worker logs.
  */
 
+import { SITE } from "../src/consts.ts";
 import type { Contact } from "../src/escaneo/contacto.ts";
+import { resultEmail } from "../src/escaneo/email.ts";
 import {
   ORDER_BANDS,
   PAYMENT_METHODS,
@@ -171,7 +173,7 @@ export async function saveToKlaviyo(env: Env, lead: Lead) {
       : klaviyo(env, `lists/${env.KLAVIYO_LIST_ID}/relationships/profiles/`, {
           data: [{ type: "profile", id: profileId }],
         }).then((r) => ensureOk("list", r)),
-    // The event a flow can start from, e.g. the email with the full result.
+    // The event the "Escaneo: resultado por email" flow starts from.
     klaviyo(env, "events/", {
       data: {
         type: "event",
@@ -183,6 +185,13 @@ export async function saveToKlaviyo(env: Env, lead: Lead) {
             ...klaviyoProperties(lead),
             hallazgos: lead.findings.map((f) => ({ titulo: f.title, detalle: f.detail })),
             arreglos: arreglos(lead.answers).map((m) => ({ titulo: m.title, detalle: m.body })),
+            ...resultEmail({
+              answers: lead.answers,
+              platform: lead.platform,
+              route: lead.route,
+              findings: lead.findings,
+              ctaUrl: `${SITE.url}/api/go?r=${lead.id}`,
+            }),
           },
         },
       },
