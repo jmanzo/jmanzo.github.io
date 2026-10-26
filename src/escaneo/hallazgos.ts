@@ -11,11 +11,12 @@
 
 import type { Platform } from "./fuga.ts";
 
-/** The fields of a /products.json product the findings use. */
+/** The fields of a /products.json product the findings and the demo use. */
 export type Product = {
   handle: string;
   title: string;
   variants: { price: string; compare_at_price: string | null; available?: boolean }[];
+  images?: { src: string }[];
 };
 
 export type Finding = {

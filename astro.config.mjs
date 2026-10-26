@@ -6,7 +6,11 @@ import rehypeExternalLinks from './src/plugins/rehype-external-links.mjs';
 
 export default defineConfig({
   site: 'https://jeanmanzo.com',
-  integrations: [mdx(), sitemap()],
+  integrations: [
+    mdx(),
+    // The Comprobación's demo is a recording tool, not a page of the site.
+    sitemap({ filter: (page) => !page.includes('/es/demo/') }),
+  ],
   // English stays at the root. Spanish lives under /es/ (src/pages/es/).
   i18n: {
     locales: ['en', 'es'],

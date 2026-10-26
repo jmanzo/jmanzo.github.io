@@ -1,0 +1,469 @@
+---
+// The Comprobación's demo (docs/backlog/lead-magnets.md, "Demo de la
+// Comprobación"). Jean opens /es/demo/?r=<id> for an unlocked Escaneo, picks a
+// product, presses Reproducir and records the phone while the chat plays.
+// Not part of the site: no header or footer, kept out of search and the
+// sitemap. The chat is the customer's phone talking to the merchant's store.
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Demo · Jean Manzo</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+  </head>
+  <body>
+    <main class="stage">
+      <form class="controls" data-controls>
+        <p class="title">Demo de la Comprobación</p>
+        <p class="status" data-status>Cargando la tienda…</p>
+        <div class="fields" data-fields hidden>
+          <label>
+            Producto
+            <select name="product" data-product></select>
+          </label>
+          <div class="manual" data-manual hidden>
+            <label>Nombre del producto <input name="title" /></label>
+            <label>Precio <input name="price" inputmode="decimal" /></label>
+          </div>
+          <label>Cliente <input name="customer" value="María" /></label>
+          <label>Transportadora <input name="carrier" data-carrier /></label>
+          <fieldset>
+            <legend>Escenas</legend>
+            <label class="check"><input type="checkbox" name="cod" /> Confirmación contraentrega</label>
+            <label class="check"><input type="checkbox" name="proof" /> Lectura del comprobante</label>
+          </fieldset>
+          <button type="submit">Reproducir</button>
+          <p class="hint">Al reproducir se esconde este panel. Esc lo vuelve a mostrar.</p>
+        </div>
+      </form>
+
+      <div class="phone" data-phone>
+        <header class="wa-head">
+          <span class="back" aria-hidden="true">‹</span>
+          <span class="avatar" data-avatar></span>
+          <span class="who">
+            <span class="name" data-name></span>
+            <span class="sub" data-sub>Cuenta de empresa</span>
+          </span>
+        </header>
+        <div class="chat" data-chat></div>
+        <footer class="wa-foot">
+          <span class="input">Mensaje</span>
+          <span class="mic" aria-hidden="true"></span>
+        </footer>
+      </div>
+    </main>
+
+    <style is:global>
+      * { box-sizing: border-box; }
+      html, body { margin: 0; }
+      body {
+        background: #1d1f21;
+        color: #e9edef;
+        font: 15px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+      .stage {
+        min-height: 100vh;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+      }
+      body.playing { cursor: none; }
+      body.playing .controls { display: none; }
+
+      .controls {
+        width: 300px;
+        max-width: 100%;
+        background: #2a2d30;
+        border-radius: 12px;
+        padding: 18px;
+      }
+      .controls .title { margin: 0 0 4px; font-weight: 600; }
+      .controls .status { margin: 0 0 12px; color: #aab4bb; font-size: 13px; }
+      .controls label { display: block; margin-bottom: 10px; font-size: 13px; color: #aab4bb; }
+      .controls input:not([type]), .controls input[inputmode], .controls select {
+        display: block;
+        width: 100%;
+        margin-top: 4px;
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #44494d;
+        background: #1d1f21;
+        color: #e9edef;
+        font: inherit;
+      }
+      .controls fieldset { border: 0; margin: 4px 0 12px; padding: 0; }
+      .controls legend { font-size: 13px; color: #aab4bb; margin-bottom: 6px; }
+      .controls .check { display: flex; gap: 8px; align-items: center; color: #e9edef; margin-bottom: 6px; }
+      .controls button {
+        width: 100%;
+        padding: 10px;
+        border: 0;
+        border-radius: 8px;
+        background: #00a884;
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .controls .hint { margin: 10px 0 0; font-size: 12px; color: #8696a0; }
+
+      .phone {
+        width: 360px;
+        max-width: 100%;
+        height: 740px;
+        max-height: calc(100vh - 48px);
+        display: flex;
+        flex-direction: column;
+        border-radius: 36px;
+        border: 10px solid #000;
+        overflow: hidden;
+        background: #efeae2;
+        color: #111b21;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+      .wa-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 26px 12px 10px;
+        background: #008069;
+        color: #fff;
+      }
+      .wa-head .back { font-size: 28px; line-height: 1; }
+      .avatar {
+        flex: none;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #dfe5e7 center / cover no-repeat;
+        color: #008069;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+      }
+      .who { display: flex; flex-direction: column; min-width: 0; }
+      .who .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .who .sub { font-size: 12px; opacity: 0.85; }
+
+      .chat {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+      }
+      .chat::-webkit-scrollbar { display: none; }
+      .msg {
+        max-width: 82%;
+        padding: 6px 9px 18px;
+        border-radius: 8px;
+        position: relative;
+        box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+        animation: pop 0.22s ease-out;
+        white-space: pre-wrap;
+      }
+      .msg.in { align-self: flex-start; background: #fff; border-top-left-radius: 2px; }
+      .msg.out { align-self: flex-end; background: #d9fdd3; border-top-right-radius: 2px; }
+      .msg .time {
+        position: absolute;
+        right: 8px;
+        bottom: 3px;
+        font-size: 11px;
+        color: #667781;
+      }
+      .msg.out .time::after { content: " ✓✓"; color: #53bdeb; }
+      @keyframes pop {
+        from { opacity: 0; transform: translateY(6px) scale(0.98); }
+        to { opacity: 1; transform: none; }
+      }
+
+      .order { padding: 4px 4px 18px; width: 82%; }
+      .order img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; background: #f0f2f5; }
+      .order .body { padding: 8px 5px 0; }
+      .order .ptitle { font-weight: 600; }
+      .order .line { display: flex; justify-content: space-between; gap: 8px; color: #3b4a54; font-size: 14px; margin-top: 2px; }
+      .order .ask { margin-top: 8px; }
+      .buttons { align-self: flex-start; width: 82%; display: flex; flex-direction: column; gap: 2px; margin-top: -4px; animation: pop 0.22s ease-out; }
+      .buttons span {
+        background: #fff;
+        color: #027eb5;
+        text-align: center;
+        padding: 9px;
+        border-radius: 8px;
+        font-weight: 500;
+        box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+        transition: background 0.2s;
+      }
+      .buttons span.tapped { background: #e1f3fb; }
+
+      .receipt { padding: 4px 4px 18px; width: 70%; }
+      .receipt .card { background: #fff; border-radius: 6px; padding: 14px 12px; text-align: center; }
+      .receipt .ok { width: 34px; height: 34px; margin: 0 auto 6px; border-radius: 50%; background: #25d366; color: #fff; display: grid; place-items: center; font-weight: 700; }
+      .receipt .label { font-size: 13px; color: #3b4a54; }
+      .receipt .amount { font-size: 22px; font-weight: 700; margin: 4px 0; }
+      .receipt .ref { font-size: 12px; color: #667781; }
+
+      .divider {
+        align-self: center;
+        background: #fff;
+        color: #54656f;
+        font-size: 12.5px;
+        padding: 5px 12px;
+        border-radius: 8px;
+        margin: 8px 0;
+        box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+        animation: pop 0.22s ease-out;
+      }
+      .divider.end { background: #ffeecd; color: #54656f; text-align: center; max-width: 86%; }
+
+      .typing { align-self: flex-start; background: #fff; border-radius: 8px; border-top-left-radius: 2px; padding: 10px 12px; display: flex; gap: 4px; }
+      .typing i { width: 7px; height: 7px; border-radius: 50%; background: #8696a0; animation: blink 1s infinite; }
+      .typing i:nth-child(2) { animation-delay: 0.15s; }
+      .typing i:nth-child(3) { animation-delay: 0.3s; }
+      @keyframes blink { 0%, 80%, 100% { opacity: 0.3; } 40% { opacity: 1; } }
+
+      .wa-foot { display: flex; gap: 8px; align-items: center; padding: 8px; background: #efeae2; }
+      .wa-foot .input { flex: 1; background: #fff; border-radius: 22px; padding: 10px 14px; color: #8696a0; }
+      .wa-foot .mic { width: 42px; height: 42px; border-radius: 50%; background: #00a884; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .msg, .buttons, .divider { animation: none; }
+      }
+    </style>
+
+    <script>
+      import {
+        CARRIER_BY_COUNTRY,
+        demoScript,
+        scenesFor,
+        type Brand,
+        type DemoProduct,
+        type Message,
+        type Scene,
+      } from "../../escaneo/demo";
+      import type { PaymentMethod } from "../../escaneo/fuga";
+
+      /** What /api/demo returns (worker/index.ts). */
+      type Demo = { id: string; brand: Brand; products: DemoProduct[]; payments: PaymentMethod[]; country: string | null };
+
+      const form = document.querySelector<HTMLFormElement>("[data-controls]")!;
+      const status = form.querySelector<HTMLElement>("[data-status]")!;
+      const fields = form.querySelector<HTMLElement>("[data-fields]")!;
+      const select = form.querySelector<HTMLSelectElement>("[data-product]")!;
+      const manual = form.querySelector<HTMLElement>("[data-manual]")!;
+      const chat = document.querySelector<HTMLElement>("[data-chat]")!;
+      const sub = document.querySelector<HTMLElement>("[data-sub]")!;
+      const MANUAL = "manual";
+
+      let demo: Demo | null = null;
+      let run = 0;
+
+      const el = (tag: string, cls: string, text?: string) => {
+        const node = document.createElement(tag);
+        node.className = cls;
+        if (text !== undefined) node.textContent = text;
+        return node;
+      };
+
+      function clock(offset: number) {
+        const d = new Date(Date.now() + offset * 60_000);
+        return d.toLocaleTimeString("es", { hour: "numeric", minute: "2-digit" });
+      }
+
+      function setBrand(brand: Brand) {
+        document.querySelector("[data-name]")!.textContent = brand.name;
+        const avatar = document.querySelector<HTMLElement>("[data-avatar]")!;
+        if (brand.icon) {
+          avatar.style.backgroundImage = `url("${brand.icon}")`;
+          avatar.textContent = "";
+        } else {
+          avatar.textContent = brand.name.charAt(0).toUpperCase();
+        }
+      }
+
+      async function load() {
+        const id = new URLSearchParams(location.search).get("r");
+        if (!id) {
+          status.textContent = "Falta el ?r= del Escaneo en la URL.";
+          return;
+        }
+        const res = await fetch(`/api/demo?r=${encodeURIComponent(id)}`).catch(() => null);
+        if (!res?.ok) {
+          const reason: Record<number, string> = {
+            404: "No encontré ese Escaneo, o todavía no está desbloqueado.",
+            422: "Ese Escaneo es de un @ de Instagram: no hay tienda que leer.",
+            502: "No pude abrir la tienda. Prueba de nuevo en un rato.",
+          };
+          status.textContent = (res && reason[res.status]) ?? "No pude cargar la demo.";
+          return;
+        }
+        demo = (await res.json()) as Demo;
+        setBrand(demo.brand);
+
+        select.replaceChildren(
+          ...demo.products.map((p, i) => new Option(p.title, String(i))),
+          new Option("Escribir a mano", MANUAL),
+        );
+        if (!demo.products.length) select.value = MANUAL;
+        manual.hidden = select.value !== MANUAL;
+        form.querySelector<HTMLInputElement>("[data-carrier]")!.value =
+          (demo.country && CARRIER_BY_COUNTRY[demo.country]) ?? "";
+        for (const scene of scenesFor(demo.payments)) form.querySelector<HTMLInputElement>(`[name=${scene}]`)!.checked = true;
+
+        status.textContent = demo.products.length
+          ? `${demo.products.length} productos de ${demo.brand.name}.`
+          : "La tienda no muestra su catálogo. Escribe el producto a mano.";
+        fields.hidden = false;
+      }
+
+      select.addEventListener("change", () => (manual.hidden = select.value !== MANUAL));
+
+      function chosenProduct(data: FormData): DemoProduct | null {
+        if (select.value !== MANUAL) return demo!.products[Number(select.value)] ?? null;
+        const title = String(data.get("title") ?? "").trim();
+        const price = Number(String(data.get("price") ?? "").replace(/[^\d.]/g, ""));
+        return title && price > 0 ? { title, price, image: null } : null;
+      }
+
+      const wait = (ms: number, token: number) =>
+        new Promise<void>((resolve, reject) => setTimeout(() => (token === run ? resolve() : reject()), ms));
+
+      function scrollDown() {
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      function bubble(msg: Message, minute: number): HTMLElement[] {
+        const time = () => el("span", "time", clock(minute));
+        switch (msg.kind) {
+          case "text":
+          case "tap": {
+            const node = el("div", `msg ${msg.from === "store" ? "in" : "out"}`, msg.text);
+            node.append(time());
+            return [node];
+          }
+          case "order": {
+            const node = el("div", "msg in order");
+            if (msg.product.image) {
+              const img = document.createElement("img");
+              img.src = msg.product.image;
+              img.alt = "";
+              node.append(img);
+            }
+            const body = el("div", "body");
+            const line = (a: string, b: string) => {
+              const row = el("div", "line");
+              row.append(el("span", "", a), el("span", "", b));
+              return row;
+            };
+            body.append(
+              el("div", "ptitle", msg.product.title),
+              line("Pedido", msg.number),
+              line("Total", msg.total),
+              line("Pago", msg.note),
+              el("div", "ask", "¿Confirmamos tu pedido?"),
+            );
+            node.append(body, time());
+            const buttons = el("div", "buttons");
+            buttons.append(...msg.buttons.map((b) => el("span", "", b)));
+            return [node, buttons];
+          }
+          case "receipt": {
+            const node = el("div", "msg out receipt");
+            const card = el("div", "card");
+            card.append(
+              el("div", "ok", "✓"),
+              el("div", "label", "Transferencia exitosa"),
+              el("div", "amount", msg.total),
+              el("div", "ref", `Referencia ${msg.reference}`),
+            );
+            node.append(card, time());
+            return [node];
+          }
+          case "divider":
+            return [el("div", "divider", msg.text)];
+        }
+      }
+
+      async function play(messages: Message[], storeName: string, token: number) {
+        chat.replaceChildren();
+        sub.textContent = "Cuenta de empresa";
+        await wait(900, token);
+        let minute = 0;
+        for (const msg of messages) {
+          // A minute per reply, and the next order on another day at another hour.
+          minute += msg.kind === "divider" ? 3 * 24 * 60 + 137 : msg.from === "store" ? 1 : 0;
+          if (msg.from === "store") {
+            const dots = el("div", "typing");
+            dots.append(el("i", ""), el("i", ""), el("i", ""));
+            chat.append(dots);
+            sub.textContent = "escribiendo…";
+            scrollDown();
+            await wait(msg.kind === "order" ? 1300 : 900, token);
+            dots.remove();
+            sub.textContent = "en línea";
+          } else if (msg.kind === "tap") {
+            const tapped = [...chat.querySelectorAll(".buttons span")].find((b) => b.textContent === msg.text);
+            await wait(900, token);
+            tapped?.classList.add("tapped");
+            await wait(300, token);
+          } else {
+            await wait(msg.kind === "divider" ? 700 : 1100, token);
+          }
+          chat.append(...bubble(msg, minute));
+          scrollDown();
+          // Time to read before the next one.
+          const length = msg.kind === "text" || msg.kind === "tap" ? msg.text.length : 60;
+          await wait(Math.min(1800, 500 + length * 22), token);
+        }
+        sub.textContent = "Cuenta de empresa";
+        chat.append(el("div", "divider end", `Todo esto pasó solo, sin que nadie de ${storeName} tocara WhatsApp.`));
+        scrollDown();
+      }
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (!demo) return;
+        const data = new FormData(form);
+        const product = chosenProduct(data);
+        const scenes = (["cod", "proof"] as Scene[]).filter((s) => data.get(s));
+        if (!product) {
+          status.textContent = "Elige un producto, o escribe su nombre y precio.";
+          return;
+        }
+        if (!scenes.length) {
+          status.textContent = "Marca al menos una escena.";
+          return;
+        }
+        const messages = demoScript({
+          brand: demo.brand,
+          product,
+          customer: String(data.get("customer") ?? "").trim() || "María",
+          carrier: String(data.get("carrier") ?? ""),
+          scenes,
+        });
+        document.body.classList.add("playing");
+        const token = ++run;
+        play(messages, demo.brand.name, token).catch(() => {});
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key !== "Escape") return;
+        run++;
+        document.body.classList.remove("playing");
+      });
+
+      load();
+    </script>
+  </body>
+</html>

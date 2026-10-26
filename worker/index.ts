@@ -8,10 +8,12 @@
  *   POST /api/event    funnel step from the page (sendBeacon)
  *   POST /api/unlock   contact in, full result out, Klaviyo and Telegram after
  *   GET  /api/go       ?r=<id>, counts the click and redirects to Jean's WhatsApp
+ *   GET  /api/demo     ?r=<id>, the store's brand and products for the Comprobación's demo
  */
 
 import { CONTACT, SITE } from "../src/consts.ts";
 import { countryOf, parseContact } from "../src/escaneo/contacto.ts";
+import { demoProducts, storeBrand } from "../src/escaneo/demo.ts";
 import {
   computeFuga,
   ctaText,
@@ -208,6 +210,38 @@ async function unlock(request: Request, env: Env, ctx: ExecutionContext) {
   return json(view(unlocked));
 }
 
+/**
+ * What the demo page needs, read fresh so the products and prices are today's.
+ * Only for unlocked results: the demo is for leads Jean is already talking to.
+ */
+async function demo(url: URL, env: Env) {
+  const id = url.searchParams.get("r");
+  const row = isId(id) ? await loadResult(env, id) : null;
+  if (!row || !row.unlocked_at) return json({ error: "not found" }, 404);
+  const answers: Answers = JSON.parse(row.answers);
+  if (answers.store.kind !== "url") return json({ error: "no store" }, 422);
+
+  const home = await get(answers.store.url).catch(() => null);
+  if (!home?.ok) return json({ error: "store unreachable" }, 502);
+  const html = (await home.text()).slice(0, MAX_HTML);
+  const origin = new URL(home.url || answers.store.url).origin;
+  let products: Product[] | null = null;
+  try {
+    const res = await get(`${origin}/products.json?limit=250`);
+    if (res.ok) products = ((await res.json()) as { products?: Product[] }).products ?? null;
+  } catch {
+    // Without a catalog the page asks Jean for the product by hand.
+  }
+  const country = await env.DB.prepare("SELECT country FROM results WHERE id = ?").bind(row.id).first<string>("country");
+  return json({
+    id: row.id,
+    brand: storeBrand(html, origin),
+    products: demoProducts(products),
+    payments: answers.payments,
+    country,
+  });
+}
+
 const EVENT_TYPES = new Set(["view", "answer"]);
 const STEPS = new Set(["store", "orders", "payments", "hours", "cod"]);
 
@@ -249,6 +283,8 @@ export default {
           return await unlock(request, env, ctx);
         case "GET /api/go":
           return await go(url, env, ctx);
+        case "GET /api/demo":
+          return await demo(url, env);
       }
     } catch (err) {
       console.error(route, err);
