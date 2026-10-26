@@ -173,8 +173,10 @@ export async function saveToKlaviyo(env: Env, lead: Lead) {
       : klaviyo(env, `lists/${env.KLAVIYO_LIST_ID}/relationships/profiles/`, {
           data: [{ type: "profile", id: profileId }],
         }).then((r) => ensureOk("list", r)),
-    // The event the "Escaneo: resultado por email" flow starts from.
-    klaviyo(env, "events/", {
+    // The event the "Escaneo: resultado por email" flow starts from. Only with
+    // an email from this unlock: without one the event matches the profile by
+    // WhatsApp, and an earlier Escaneo's email would get this result.
+    c.email && klaviyo(env, "events/", {
       data: {
         type: "event",
         attributes: {

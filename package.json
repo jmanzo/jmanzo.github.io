@@ -11,7 +11,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "migrate:wp": "node scripts/migrate-wp.mjs",
-    "test": "node --test \"src/**/*.test.ts\"",
+    "test": "node --test \"src/**/*.test.ts\" \"worker/**/*.test.ts\"",
     "worker:dev": "astro build && wrangler d1 migrations apply escaneo --local && wrangler dev"
   },
   "dependencies": {
