@@ -256,11 +256,12 @@ async function event(request: Request, env: Env) {
   return new Response(null, { status: 204 });
 }
 
-async function go(url: URL, env: Env, ctx: ExecutionContext) {
+/** HEAD gets the same redirect without counting a click (link previews, curl -I). */
+async function go(url: URL, env: Env, ctx: ExecutionContext, click = true) {
   const id = url.searchParams.get("r");
   const row = isId(id) ? await loadResult(env, id) : null;
   const text = row ? ctaText(JSON.parse(row.answers), row.id, row.route) : "Hola Jean, hice el Escaneo de operar a mano. Quiero mi Comprobación.";
-  if (row) ctx.waitUntil(logEvent(env, { type: "click", session: row.session, channel: row.channel, resultId: row.id }));
+  if (row && click) ctx.waitUntil(logEvent(env, { type: "click", session: row.session, channel: row.channel, resultId: row.id }));
   const to = CONTACT.whatsapp
     ? `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(text)}`
     : `mailto:${CONTACT.email}?subject=${encodeURIComponent("Quiero mi Comprobación")}&body=${encodeURIComponent(text)}`;
@@ -283,6 +284,8 @@ export default {
           return await unlock(request, env, ctx);
         case "GET /api/go":
           return await go(url, env, ctx);
+        case "HEAD /api/go":
+          return await go(url, env, ctx, false);
         case "GET /api/demo":
           return await demo(url, env);
       }
