@@ -6,3 +6,7 @@
 # Astro fingerprints everything under /_astro/, so it never changes in place.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+
+# The Comprobación's demo, opened per lead with ?r=<id>. Kept out of search.
+/es/demo/*
+  X-Robots-Tag: noindex, nofollow
