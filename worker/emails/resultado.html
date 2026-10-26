@@ -1,0 +1,82 @@
+<!doctype html>
+<!--
+  The "Escaneo: resultado por email" flow in Klaviyo (scripts/setup-escaneo-email.sh).
+  Imported as is under Content > Templates > Import. It only prints the
+  "Escaneo desbloqueado" event's fields; the copy lives in src/escaneo/email.ts.
+  After changing this file, import it again and pick it in the flow's email.
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Tu Escaneo de {{ event.escaneo_tienda }}</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f8fb;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f8fb;">
+<tr><td align="center" style="padding:24px 16px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background:#ffffff;border:1px solid #d9e2ea;border-radius:8px;">
+<tr><td style="padding:32px 28px;font-family:Roboto,'Helvetica Neue',Arial,sans-serif;font-size:16px;line-height:1.55;color:#0c1822;">
+
+  <p style="margin:0 0 20px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7a8fa1;">¿Cuánto te cuesta operar a mano?</p>
+
+  <p style="margin:0 0 16px;">{% if person.first_name %}Hola, {{ person.first_name }}.{% else %}Hola.{% endif %}</p>
+  <p style="margin:0 0 24px;">Este es el resultado completo del Escaneo de {{ event.escaneo_tienda }}, para que lo tengas a mano. Operando a mano se te van:</p>
+
+  <p style="margin:0;font-family:Montserrat,'Helvetica Neue',Arial,sans-serif;font-size:32px;line-height:1.15;font-weight:700;color:#0082c9;">{{ event.titular }}</p>
+  {% if event.plata %}<p style="margin:6px 0 0;font-family:Montserrat,'Helvetica Neue',Arial,sans-serif;font-size:18px;font-weight:600;color:#0c1822;">{{ event.plata }}</p>{% endif %}
+  <p style="margin:10px 0 0;font-size:14px;color:#4b6275;">{{ event.base }}</p>
+
+  <p style="margin:32px 0 8px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7a8fa1;">Desglose</p>
+  {% for seccion in event.desglose %}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 16px;font-size:14px;">
+    <tr><td colspan="2" style="padding:0 0 6px;font-weight:700;">{{ seccion.titulo }}</td></tr>
+    {% for fila in seccion.filas %}
+    <tr>
+      <td style="padding:6px 8px 6px 0;border-top:1px solid #d9e2ea;color:#4b6275;">{{ fila.calculo }}</td>
+      <td align="right" style="padding:6px 0;border-top:1px solid #d9e2ea;font-weight:600;white-space:nowrap;">{{ fila.total }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endfor %}
+
+  <p style="margin:24px 0 8px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7a8fa1;">Lo que encontré en tu tienda</p>
+  {% if event.sin_hallazgos %}
+  <p style="margin:0;font-size:15px;color:#4b6275;">{{ event.sin_hallazgos }}</p>
+  {% else %}
+  {% for hallazgo in event.hallazgos %}
+  <p style="margin:0 0 4px;font-weight:700;">{{ hallazgo.titulo }}</p>
+  <p style="margin:0 0 14px;font-size:15px;color:#4b6275;">{{ hallazgo.detalle }}</p>
+  {% endfor %}
+  {% endif %}
+
+  <p style="margin:24px 0 8px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7a8fa1;">Cómo se arregla</p>
+  {% for arreglo in event.arreglos %}
+  <p style="margin:0 0 4px;font-weight:700;">{{ arreglo.titulo }}</p>
+  <p style="margin:0 0 14px;font-size:15px;color:#4b6275;">{{ arreglo.detalle }}</p>
+  {% endfor %}
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0 0;background:#e4f1fa;border-radius:8px;">
+  <tr><td style="padding:22px 20px;">
+    <p style="margin:0 0 8px;font-family:Montserrat,'Helvetica Neue',Arial,sans-serif;font-size:18px;font-weight:700;">{{ event.ruta_titulo }}</p>
+    <p style="margin:0 0 {% if event.ruta_primero %}8px{% else %}18px{% endif %};font-size:15px;">{{ event.ruta_texto }}</p>
+    {% if event.ruta_primero %}<p style="margin:0 0 18px;font-size:15px;">Por dónde empezaría: <strong>{{ event.ruta_primero }}</strong>.</p>{% endif %}
+    <a href="{{ event.ruta_url }}" style="display:inline-block;padding:12px 20px;background:#0082c9;border-radius:6px;color:#ffffff;font-family:Montserrat,'Helvetica Neue',Arial,sans-serif;font-size:15px;font-weight:700;text-decoration:none;">{{ event.ruta_cta }}</a>
+  </td></tr>
+  </table>
+
+  <p style="margin:24px 0 0;font-size:14px;color:#4b6275;">El resultado también está en la web: <a href="{{ event.escaneo_url }}" style="color:#00639b;">ábrelo aquí</a>. Si respondes este correo, me llega a mí.</p>
+
+  <p style="margin:24px 0 0;">Jean Manzo<br><span style="font-size:14px;color:#4b6275;">Desarrollador senior de Shopify, Medellín</span></p>
+
+</td></tr>
+</table>
+<p style="margin:16px 0 0;font-family:Roboto,'Helvetica Neue',Arial,sans-serif;font-size:12px;line-height:1.5;color:#7a8fa1;">
+  Te llega porque hiciste el Escaneo en jeanmanzo.com y dejaste tu email.<br>
+  {{ organization.name }} · {{ organization.full_address }}<br>
+  <a href="{% unsubscribe_link %}" style="color:#7a8fa1;">No quiero recibir más correos</a>
+</p>
+</td></tr>
+</table>
+</body>
+</html>

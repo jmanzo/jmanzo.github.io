@@ -315,11 +315,12 @@ const next = [
   import { emailOf, validName, whatsappDigits } from "../../escaneo/contacto";
   import {
     arreglos,
-    computeFuga,
     ctaText,
     fugaBreakdown,
-    formatNumber as fmt,
+    fugaHeadline,
+    noFindingsText,
     parseChannel,
+    routeCopy,
     parseStore,
     type Answers,
     type Fuga,
@@ -446,16 +447,12 @@ const next = [
   }
 
   function render(a: Answers) {
-    const f = computeFuga(a);
-    panel.querySelector("[data-headline]")!.textContent = `${fmt(f.hoursPerMonth)} horas al mes`;
+    const headline = fugaHeadline(a);
+    panel.querySelector("[data-headline]")!.textContent = headline.hours;
     const moneyLine = panel.querySelector<HTMLElement>("[data-money]")!;
-    moneyLine.hidden = f.moneyPerMonth === null;
-    if (f.moneyPerMonth !== null)
-      moneyLine.textContent = `y ${fmt(f.moneyPerMonth)} al mes en envíos que vuelven`;
-
-    const basis = [`${fmt(f.ordersPerDay)} pedidos por día`, `${String(a.hoursPerDay).replace(".", ",")} horas diarias`];
-    if (a.cod) basis.push(`${a.cod.rejectedPerTen} de cada 10 rechazados a ${fmt(a.cod.returnCost)} cada envío`);
-    panel.querySelector("[data-basis]")!.textContent = `Con ${basis.join(", ")}.`;
+    moneyLine.hidden = headline.money === null;
+    if (headline.money !== null) moneyLine.textContent = headline.money;
+    panel.querySelector("[data-basis]")!.textContent = headline.basis;
 
     cta.href = directCta(a);
     direct.hidden = false;
@@ -502,33 +499,6 @@ const next = [
     );
   }
 
-  /** The route's offer (lead-magnets.md, "Ruta de cada lead"). The price never shows. */
-  function routeCopy(route: Route, platform: Platform) {
-    switch (route) {
-      case "comprobacion":
-        return {
-          title: "Tu tienda califica para la Comprobación",
-          body: "Pruebo cuánto tarda en responder tu WhatsApp de ventas y te mando una demo con tus productos. Es gratis y no tienes que instalar nada.",
-          cta: "Quiero mi Comprobación",
-        };
-      case "email":
-        return {
-          title: "Con tu volumen, lo que más te mueve ahora es vender más",
-          body: "Puedo revisar tu tienda y decirte qué arreglaría primero para que te compren más.",
-          cta: "Quiero saber qué arreglar primero",
-        };
-      case "espera":
-        return {
-          title: "Por ahora esto funciona solo con Shopify",
-          body:
-            platform === "none"
-              ? "Te anoté en la lista de espera para cuando funcione con ventas por Instagram. Si lo quieres antes, puedo montarte la tienda en Shopify."
-              : "Te anoté en la lista de espera para cuando funcione con tu plataforma. Si lo quieres antes, puedo migrar tu tienda a Shopify.",
-          cta: "Quiero pasar a Shopify",
-        };
-    }
-  }
-
   function renderFull(saved: Extract<Saved, { unlocked: true }>) {
     panel.querySelector("[data-breakdown]")!.replaceChildren(
       ...fugaBreakdown(saved.answers).map((section) => {
@@ -549,10 +519,7 @@ const next = [
     );
     const none = panel.querySelector<HTMLElement>("[data-no-findings]")!;
     none.hidden = saved.findings.length > 0;
-    none.textContent =
-      saved.platform === "none"
-        ? "Con un @ de Instagram no hay tienda que revisar desde fuera. La Comprobación mira tu WhatsApp de ventas."
-        : "No encontré problemas desde fuera. La Comprobación revisa lo que solo se ve por dentro.";
+    none.textContent = noFindingsText(saved.platform);
 
     listItems(panel.querySelector("[data-plan]")!, arreglos(saved.answers));
 
