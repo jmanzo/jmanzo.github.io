@@ -212,7 +212,7 @@ const next = [
               autocapitalize="off"
               spellcheck="false"
             />
-            <p class="hint">Te mando una copia del resultado completo para que la tengas a mano.</p>
+            <p class="hint">Si prefieres que te escriba por ahí.</p>
             <label class="consent">
               <input type="checkbox" name="consent" />
               <span>
@@ -241,7 +241,6 @@ const next = [
             <div class="route">
               <p class="route-title" data-route-title></p>
               <p class="route-body" data-route-body></p>
-              <p class="hint" data-copy-sent hidden></p>
               <a class="btn btn-a" data-route-cta target="_blank" rel="noopener"></a>
             </div>
           </div>
@@ -530,7 +529,7 @@ const next = [
     }
   }
 
-  function renderFull(saved: Extract<Saved, { unlocked: true }>, email?: string | null) {
+  function renderFull(saved: Extract<Saved, { unlocked: true }>) {
     panel.querySelector("[data-breakdown]")!.replaceChildren(
       ...fugaBreakdown(saved.answers).map((section) => {
         const table = el("table", undefined, "breakdown");
@@ -563,9 +562,6 @@ const next = [
     const routeCta = panel.querySelector<HTMLAnchorElement>("[data-route-cta]")!;
     routeCta.textContent = copy.cta;
     routeCta.href = `/api/go?r=${saved.id}`;
-    const sent = panel.querySelector<HTMLElement>("[data-copy-sent]")!;
-    sent.hidden = !email;
-    if (email) sent.textContent = `Te llega una copia a ${email}.`;
 
     // The full list repeats the worst finding, so the teaser goes.
     finding.hidden = true;
@@ -647,7 +643,7 @@ const next = [
       });
       if (!res.ok) throw new Error(String(res.status));
       const saved = (await res.json()) as Saved;
-      if (saved.unlocked) renderFull(saved, emailOf(value("email")) || null);
+      if (saved.unlocked) renderFull(saved);
     } catch {
       unlockError.textContent = "No pude guardar tus datos. Intenta de nuevo en un momento.";
     } finally {
