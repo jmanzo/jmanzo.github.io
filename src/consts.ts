@@ -29,6 +29,13 @@ export const SITE = {
 export const CONTACT = {
   bookingUrl: "https://calendly.com/jdevmanzo-1/30min",
   bookingLabel: "Book a 30-min call",
+  /** Where data requests under the Spanish privacy policy go. */
+  email: "jdevmanzo@gmail.com",
+  /**
+   * Jean's WhatsApp, digits only with the country code (wa.me format).
+   * If emptied, the Escaneo's CTA falls back to email.
+   */
+  whatsapp: "573505786124",
 } as const;
 
 export const SOCIAL_ICONS = ["github", "linkedin", "x"] as const;

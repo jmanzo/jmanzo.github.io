@@ -1,0 +1,765 @@
+---
+import Base from "../../layouts/Base.astro";
+import Years from "../../components/Years.astro";
+import { CAREER, CONTACT } from "../../consts";
+import { ORDER_BANDS, PAYMENT_METHODS } from "../../escaneo/fuga";
+
+// Lead magnet 1 (docs/backlog/plan-escaneo-operar-a-mano.md). The Fuga is
+// computed in the browser so it shows at once; the Worker (worker/index.ts)
+// reads the store, saves the result at ?r=<id> and logs the funnel. If the
+// Worker is down, the result still shows and the CTA goes straight to
+// WhatsApp. Once saved, the unlock form takes the CTA's place, and the full
+// result (breakdown, every finding, the plan and the route's CTA) shows after it.
+
+const proofs = [
+  {
+    who: "Marlies Dekkers",
+    what: "Bajé el tiempo de carga del contenido principal de 14 s a 6 s.",
+    href: "https://marliesdekkers.com",
+  },
+  {
+    who: "Nuflorist",
+    what: "Construí los widgets de la tienda y el checkout de una app de Shopify para floristerías.",
+  },
+  {
+    who: "Duilify",
+    what: "Mi propia app de pruebas de precio, publicada en la App Store de Shopify.",
+    href: "https://apps.shopify.com/duilify",
+  },
+];
+
+const next = [
+  {
+    title: "Escaneo",
+    body: "Tus números, tu resultado. Un minuto y sin crear cuenta.",
+  },
+  {
+    title: "Comprobación",
+    body: "Pruebo cuánto tarda en responder tu WhatsApp de ventas y te mando una demo con tus productos.",
+  },
+  {
+    title: "Arreglo",
+    body: "Si te sirve, lo dejo funcionando con fecha de entrega y garantía.",
+  },
+];
+---
+
+<Base
+  title="¿Cuánto te cuesta operar a mano?"
+  description="Calcula cuántas horas y cuánto dinero se te van cada mes confirmando pedidos, revisando comprobantes y pasándolos a la transportadora."
+>
+  <div class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="eyebrow">
+          <span class="dot"></span>
+          <span class="lab">Escaneo gratis · 1 minuto</span>
+        </div>
+        <h1>¿Cuánto te cuesta <em>operar a mano?</em></h1>
+        <p class="lede">
+          Confirmar pedidos, revisar comprobantes y pasarlos a la transportadora. Calcula cuántas
+          horas y cuánto dinero se te van cada mes, con tus propios números.
+        </p>
+      </div>
+
+      <div class="panel scan" id="escaneo">
+        <div class="panel-head">
+          <h2>Escaneo</h2>
+          <span class="lab" data-progress></span>
+        </div>
+
+        <noscript>
+          <p class="scan-body">Activa JavaScript para usar el Escaneo.</p>
+        </noscript>
+
+        <form class="scan-body" data-scan hidden novalidate>
+          <fieldset data-step="store">
+            <legend>¿Cuál es tu tienda?</legend>
+            <label class="sr-only" for="scan-store">URL de tu tienda o tu @ de Instagram</label>
+            <input
+              id="scan-store"
+              name="store"
+              type="text"
+              inputmode="url"
+              autocomplete="url"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="tutienda.com o @tutienda"
+            />
+            <p class="hint">Si solo vendes por Instagram, pon tu @.</p>
+          </fieldset>
+
+          <fieldset data-step="orders" hidden>
+            <legend>¿Cuántos pedidos tienes por día?</legend>
+            <div class="chips">
+              {
+                ORDER_BANDS.map((b) => (
+                  <label class="pick">
+                    <input type="radio" name="orders" value={b.id} />
+                    <span>{b.label}</span>
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+
+          <fieldset data-step="payments" hidden>
+            <legend>¿Cómo te pagan tus clientes?</legend>
+            <p class="hint">Marca todas las que apliquen.</p>
+            <div class="chips chips-col">
+              {
+                PAYMENT_METHODS.map((m) => (
+                  <label class="pick">
+                    <input type="checkbox" name="payments" value={m.id} />
+                    <span>{m.label}</span>
+                  </label>
+                ))
+              }
+            </div>
+          </fieldset>
+
+          <fieldset data-step="hours" hidden>
+            <legend>
+              ¿Cuántas horas al día se te van en confirmar pedidos, revisar comprobantes y pasarlos a
+              la transportadora?
+            </legend>
+            <p class="hint">Suma todo, aunque lo hagan varias personas.</p>
+            <div class="unit">
+              <label class="sr-only" for="scan-hours">Horas al día</label>
+              <input id="scan-hours" name="hours" type="text" inputmode="decimal" placeholder="2" />
+              <span>horas al día</span>
+            </div>
+          </fieldset>
+
+          <fieldset data-step="cod" hidden>
+            <legend>De cada 10 pedidos, ¿cuántos te rechazan en la entrega?</legend>
+            <div class="chips chips-n">
+              {
+                Array.from({ length: 11 }, (_, n) => (
+                  <label class="pick">
+                    <input type="radio" name="rejected" value={n} />
+                    <span>{n}</span>
+                  </label>
+                ))
+              }
+            </div>
+            <label class="q" for="scan-return">¿Cuánto te cuesta un envío que vuelve?</label>
+            <div class="unit">
+              <input
+                id="scan-return"
+                name="returnCost"
+                type="text"
+                inputmode="numeric"
+                placeholder="10000"
+              />
+              <span>en tu moneda</span>
+            </div>
+          </fieldset>
+
+          <p class="scan-error" data-error role="alert"></p>
+
+          <div class="scan-nav">
+            <button type="button" class="btn btn-b" data-back hidden>Atrás</button>
+            <button type="submit" class="btn btn-a" data-next>Siguiente</button>
+          </div>
+        </form>
+
+        <div class="scan-body" data-result hidden aria-live="polite">
+          <p class="lab">Operar a mano te cuesta</p>
+          <p class="fuga" data-headline></p>
+          <p class="fuga-money" data-money hidden></p>
+          <p class="fuga-basis" data-basis></p>
+          <p class="hint">Calculado solo con tus respuestas, sin promedios del mercado.</p>
+          <p class="hint" data-reading hidden>Revisando tu tienda…</p>
+          <div class="finding" data-finding hidden>
+            <p class="lab">Lo que encontré en tu tienda</p>
+            <p class="finding-title" data-finding-title></p>
+            <p class="finding-detail" data-finding-detail></p>
+          </div>
+          <div class="cta-row" data-direct>
+            <a class="btn btn-a" data-cta target="_blank" rel="noopener">
+              Quiero ver cómo recuperarlo
+            </a>
+          </div>
+
+          <form class="unlock" data-unlock hidden novalidate>
+            <p class="lab">Resultado completo</p>
+            <p class="unlock-lede">
+              El desglose de tu Fuga, todo lo que encontré en tu tienda y cómo se arregla.
+            </p>
+            <label class="q" for="unlock-name">Tu nombre</label>
+            <input id="unlock-name" name="name" type="text" autocomplete="name" />
+            <label class="q" for="unlock-whatsapp">Tu WhatsApp</label>
+            <div class="unit phone">
+              <span>+</span>
+              <input
+                id="unlock-whatsapp"
+                name="whatsapp"
+                type="text"
+                inputmode="tel"
+                autocomplete="tel"
+                placeholder="57 300 123 4567"
+              />
+            </div>
+            <p class="hint">Con el código de tu país.</p>
+            <label class="q" for="unlock-email">Tu email <span class="opt">(opcional)</span></label>
+            <input
+              id="unlock-email"
+              name="email"
+              type="text"
+              inputmode="email"
+              autocomplete="email"
+              autocapitalize="off"
+              spellcheck="false"
+            />
+            <p class="hint">Si prefieres que te escriba por ahí.</p>
+            <label class="consent">
+              <input type="checkbox" name="consent" />
+              <span>
+                Autorizo el tratamiento de mis datos según la{" "}
+                <a href="/es/privacidad/" target="_blank" rel="noopener">política de privacidad</a>.
+              </span>
+            </label>
+            <p class="scan-error" data-unlock-error role="alert"></p>
+            <button type="submit" class="btn btn-a">Ver el resultado completo</button>
+          </form>
+
+          <div class="full" data-full hidden>
+            <div class="full-sec">
+              <p class="lab">Desglose</p>
+              <div data-breakdown></div>
+            </div>
+            <div class="full-sec">
+              <p class="lab">Lo que encontré en tu tienda</p>
+              <ol class="list" data-findings></ol>
+              <p class="hint" data-no-findings hidden></p>
+            </div>
+            <div class="full-sec">
+              <p class="lab">Cómo se arregla</p>
+              <ol class="list" data-plan></ol>
+            </div>
+            <div class="route">
+              <p class="route-title" data-route-title></p>
+              <p class="route-body" data-route-body></p>
+              <a class="btn btn-a" data-route-cta target="_blank" rel="noopener"></a>
+            </div>
+          </div>
+
+          <div class="cta-row">
+            <button type="button" class="btn btn-b" data-restart>Volver a calcular</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <div class="wrap sec split">
+      <h2>Qué sigue</h2>
+      <div class="col">
+        <ol class="steps">
+          {
+            next.map((s, i) => (
+              <li class="step">
+                <div class="step-n">{String(i + 1).padStart(2, "0")}</div>
+                <div>
+                  <h3>{s.title}</h3>
+                  <p>{s.body}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap sec split">
+      <h2>Quién está detrás</h2>
+      <div class="col">
+        <p class="claim">
+          Soy Jean Manzo. Llevo <Years since={CAREER.developerSince} /> años en desarrollo web,{" "}
+          <Years since={CAREER.shopifySince} /> de ellos dentro de Shopify.
+        </p>
+        <ul class="quotes">
+          {
+            proofs.map((p) => (
+              <li>
+                <p class="lab who">
+                  {p.href ? (
+                    <a href={p.href} target="_blank" rel="noopener">
+                      {p.who}
+                    </a>
+                  ) : (
+                    p.who
+                  )}
+                </p>
+                <blockquote>{p.what}</blockquote>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script define:vars={{ whatsapp: CONTACT.whatsapp, email: CONTACT.email }}>
+  // Handed to the module script below through the window: define:vars makes
+  // its own script inline, and that one can't import.
+  window.__escaneoContact = { whatsapp, email };
+</script>
+
+<script>
+  import { emailOf, validName, whatsappDigits } from "../../escaneo/contacto";
+  import {
+    arreglos,
+    computeFuga,
+    ctaText,
+    fugaBreakdown,
+    formatNumber as fmt,
+    parseChannel,
+    parseStore,
+    type Answers,
+    type Fuga,
+    type OrderBand,
+    type PaymentMethod,
+    type Platform,
+    type RawAnswers,
+    type Route,
+  } from "../../escaneo/fuga";
+  import type { Finding } from "../../escaneo/hallazgos";
+
+  const { whatsapp, email } = (window as any).__escaneoContact as {
+    whatsapp: string;
+    email: string;
+  };
+
+  /** What /api/scan and /api/result return (worker/index.ts, publicResult). */
+  type Saved = { id: string; answers: Answers; fuga: Fuga; platform: Platform; finding: Finding | null } & (
+    | { unlocked: false }
+    | { unlocked: true; route: Route; findings: Finding[] }
+  );
+
+  const panel = document.getElementById("escaneo")!;
+  const form = panel.querySelector<HTMLFormElement>("[data-scan]")!;
+  const result = panel.querySelector<HTMLElement>("[data-result]")!;
+  const progress = panel.querySelector<HTMLElement>("[data-progress]")!;
+  const error = panel.querySelector<HTMLElement>("[data-error]")!;
+  const back = panel.querySelector<HTMLButtonElement>("[data-back]")!;
+  const nextBtn = panel.querySelector<HTMLButtonElement>("[data-next]")!;
+  const reading = panel.querySelector<HTMLElement>("[data-reading]")!;
+  const finding = panel.querySelector<HTMLElement>("[data-finding]")!;
+  const cta = panel.querySelector<HTMLAnchorElement>("[data-cta]")!;
+  const direct = panel.querySelector<HTMLElement>("[data-direct]")!;
+  const unlockForm = panel.querySelector<HTMLFormElement>("[data-unlock]")!;
+  const unlockError = panel.querySelector<HTMLElement>("[data-unlock-error]")!;
+  const full = panel.querySelector<HTMLElement>("[data-full]")!;
+  const steps = [...form.querySelectorAll<HTMLFieldSetElement>("[data-step]")];
+
+  const params = new URLSearchParams(location.search);
+  const channel = parseChannel(params.get("c"));
+
+  // Ties this visit's funnel events together. Not stored anywhere else.
+  const session = (() => {
+    try {
+      const saved = sessionStorage.getItem("escaneo-session");
+      if (saved) return saved;
+      const fresh = crypto.randomUUID();
+      sessionStorage.setItem("escaneo-session", fresh);
+      return fresh;
+    } catch {
+      return crypto.randomUUID();
+    }
+  })();
+
+  function track(type: "view" | "answer", step?: string) {
+    const body = JSON.stringify({ type, step, session, channel });
+    // sendBeacon survives the merchant closing the tab mid-question.
+    if (!navigator.sendBeacon?.("/api/event", new Blob([body], { type: "application/json" })))
+      fetch("/api/event", { method: "POST", body, keepalive: true }).catch(() => {});
+  }
+
+  const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement;
+  const checked = (name: string) =>
+    [...form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]:checked`)].map(
+      (i) => i.value,
+    );
+  const number = (raw: string) => Number(raw.replace(",", ".").replace(/[^\d.]/g, ""));
+  const money = (raw: string) => Number(raw.replace(/\D/g, ""));
+
+  const hasCod = () => checked("payments").includes("cod");
+  // The COD step only exists for merchants who sell contraentrega.
+  const activeSteps = () => steps.filter((s) => s.dataset.step !== "cod" || hasCod());
+
+  let current = 0;
+
+  function show(i: number) {
+    current = i;
+    const active = activeSteps();
+    steps.forEach((s) => (s.hidden = s !== active[i]));
+    back.hidden = i === 0;
+    nextBtn.textContent = i === active.length - 1 ? "Ver mi resultado" : "Siguiente";
+    progress.textContent = `Pregunta ${i + 1} de ${active.length}`;
+    error.textContent = "";
+    active[i].querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+  }
+
+  /** Returns an error message for the step, or "" when it's answered. */
+  function validate(step: string): string {
+    switch (step) {
+      case "store":
+        return parseStore(field("store").value) ? "" : "Pon la URL de tu tienda o tu @ de Instagram.";
+      case "orders":
+        return checked("orders").length ? "" : "Elige una opción.";
+      case "payments":
+        return checked("payments").length ? "" : "Marca al menos una.";
+      case "hours": {
+        const h = number(field("hours").value);
+        return h > 0 && h <= 24 ? "" : "Pon un número de horas entre 0,5 y 24.";
+      }
+      case "cod":
+        if (!checked("rejected").length) return "Elige cuántos de cada 10 te rechazan.";
+        return money(field("returnCost").value) > 0 ? "" : "Pon cuánto te cuesta un envío que vuelve.";
+    }
+    return "";
+  }
+
+  function rawAnswers(): RawAnswers {
+    return {
+      store: field("store").value,
+      orders: checked("orders")[0] as OrderBand,
+      payments: checked("payments") as PaymentMethod[],
+      hoursPerDay: number(field("hours").value),
+      cod: hasCod()
+        ? { rejectedPerTen: Number(checked("rejected")[0]), returnCost: money(field("returnCost").value) }
+        : undefined,
+    };
+  }
+
+  function directCta(a: Answers) {
+    const text = ctaText(a);
+    return whatsapp
+      ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(text)}`
+      : `mailto:${email}?subject=${encodeURIComponent("Quiero mi Comprobación")}&body=${encodeURIComponent(text)}`;
+  }
+
+  function render(a: Answers) {
+    const f = computeFuga(a);
+    panel.querySelector("[data-headline]")!.textContent = `${fmt(f.hoursPerMonth)} horas al mes`;
+    const moneyLine = panel.querySelector<HTMLElement>("[data-money]")!;
+    moneyLine.hidden = f.moneyPerMonth === null;
+    if (f.moneyPerMonth !== null)
+      moneyLine.textContent = `y ${fmt(f.moneyPerMonth)} al mes en envíos que vuelven`;
+
+    const basis = [`${fmt(f.ordersPerDay)} pedidos por día`, `${String(a.hoursPerDay).replace(".", ",")} horas diarias`];
+    if (a.cod) basis.push(`${a.cod.rejectedPerTen} de cada 10 rechazados a ${fmt(a.cod.returnCost)} cada envío`);
+    panel.querySelector("[data-basis]")!.textContent = `Con ${basis.join(", ")}.`;
+
+    cta.href = directCta(a);
+    direct.hidden = false;
+    finding.hidden = true;
+    unlockForm.hidden = true;
+    full.hidden = true;
+    form.hidden = true;
+    result.hidden = false;
+    progress.textContent = "Resultado";
+  }
+
+  let savedId: string | null = null;
+
+  /** Adds what only the Worker knows: the store finding and the saved result's link. */
+  function renderSaved(saved: Saved) {
+    savedId = saved.id;
+    if (saved.finding) {
+      panel.querySelector("[data-finding-title]")!.textContent = saved.finding.title;
+      panel.querySelector("[data-finding-detail]")!.textContent = saved.finding.detail;
+      finding.hidden = false;
+    }
+    const url = new URL(location.href);
+    url.searchParams.set("r", saved.id);
+    history.replaceState(null, "", url);
+    direct.hidden = true;
+    if (saved.unlocked) renderFull(saved);
+    else unlockForm.hidden = false;
+  }
+
+  const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, className?: string) => {
+    const node = document.createElement(tag);
+    if (text) node.textContent = text;
+    if (className) node.className = className;
+    return node;
+  };
+
+  function listItems(list: HTMLElement, items: { title: string; body: string }[]) {
+    list.replaceChildren(
+      ...items.map((i) => {
+        const li = el("li");
+        li.append(el("p", i.title, "item-title"), el("p", i.body, "item-body"));
+        return li;
+      }),
+    );
+  }
+
+  /** The route's offer (lead-magnets.md, "Ruta de cada lead"). The price never shows. */
+  function routeCopy(route: Route, platform: Platform) {
+    switch (route) {
+      case "comprobacion":
+        return {
+          title: "Tu tienda califica para la Comprobación",
+          body: "Pruebo cuánto tarda en responder tu WhatsApp de ventas y te mando una demo con tus productos. Es gratis y no tienes que instalar nada.",
+          cta: "Quiero mi Comprobación",
+        };
+      case "email":
+        return {
+          title: "Con tu volumen, lo que más te mueve ahora es vender más",
+          body: "Puedo revisar tu tienda y decirte qué arreglaría primero para que te compren más.",
+          cta: "Quiero saber qué arreglar primero",
+        };
+      case "espera":
+        return {
+          title: "Por ahora esto funciona solo con Shopify",
+          body:
+            platform === "none"
+              ? "Te anoté en la lista de espera para cuando funcione con ventas por Instagram. Si lo quieres antes, puedo montarte la tienda en Shopify."
+              : "Te anoté en la lista de espera para cuando funcione con tu plataforma. Si lo quieres antes, puedo migrar tu tienda a Shopify.",
+          cta: "Quiero pasar a Shopify",
+        };
+    }
+  }
+
+  function renderFull(saved: Extract<Saved, { unlocked: true }>) {
+    panel.querySelector("[data-breakdown]")!.replaceChildren(
+      ...fugaBreakdown(saved.answers).map((section) => {
+        const table = el("table", undefined, "breakdown");
+        table.append(el("caption", section.title));
+        for (const [math, total] of section.rows) {
+          const tr = el("tr");
+          tr.append(el("td", math), el("td", total));
+          table.append(tr);
+        }
+        return table;
+      }),
+    );
+
+    listItems(
+      panel.querySelector("[data-findings]")!,
+      saved.findings.map((f) => ({ title: f.title, body: f.detail })),
+    );
+    const none = panel.querySelector<HTMLElement>("[data-no-findings]")!;
+    none.hidden = saved.findings.length > 0;
+    none.textContent =
+      saved.platform === "none"
+        ? "Con un @ de Instagram no hay tienda que revisar desde fuera. La Comprobación mira tu WhatsApp de ventas."
+        : "No encontré problemas desde fuera. La Comprobación revisa lo que solo se ve por dentro.";
+
+    listItems(panel.querySelector("[data-plan]")!, arreglos(saved.answers));
+
+    const copy = routeCopy(saved.route, saved.platform);
+    panel.querySelector("[data-route-title]")!.textContent = copy.title;
+    panel.querySelector("[data-route-body]")!.textContent = copy.body;
+    const routeCta = panel.querySelector<HTMLAnchorElement>("[data-route-cta]")!;
+    routeCta.textContent = copy.cta;
+    routeCta.href = `/api/go?r=${saved.id}`;
+
+    // The full list repeats the worst finding, so the teaser goes.
+    finding.hidden = true;
+    unlockForm.hidden = true;
+    full.hidden = false;
+  }
+
+  async function save(raw: RawAnswers) {
+    reading.hidden = false;
+    try {
+      const res = await fetch("/api/scan", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ answers: raw, session, channel }),
+      });
+      if (res.ok) renderSaved(await res.json());
+    } catch {
+      // The local result and the direct CTA already work without the Worker.
+    } finally {
+      reading.hidden = true;
+    }
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const active = activeSteps();
+    const step = active[current].dataset.step!;
+    const message = validate(step);
+    if (message) {
+      error.textContent = message;
+      return;
+    }
+    track("answer", step);
+    if (current < active.length - 1) {
+      show(current + 1);
+      return;
+    }
+    const raw = rawAnswers();
+    render({ ...raw, store: parseStore(raw.store)! });
+    save(raw);
+  });
+
+  // A single-choice tap is the answer: move on without a second tap.
+  form.addEventListener("change", (e) => {
+    const input = e.target as HTMLInputElement;
+    if (input.type === "radio" && input.name === "orders") form.requestSubmit();
+  });
+
+  back.addEventListener("click", () => show(current - 1));
+
+  function validateUnlock(): string {
+    const value = (name: string) => (unlockForm.elements.namedItem(name) as HTMLInputElement).value;
+    if (!validName(value("name"))) return "Pon tu nombre.";
+    if (!whatsappDigits(value("whatsapp"))) return "Pon tu WhatsApp con el código de tu país, por ejemplo 57 300 123 4567.";
+    if (emailOf(value("email")) === false) return "Revisa tu email, o déjalo vacío.";
+    if (!(unlockForm.elements.namedItem("consent") as HTMLInputElement).checked)
+      return "Marca la autorización para ver el resultado completo.";
+    return "";
+  }
+
+  unlockForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const message = validateUnlock();
+    unlockError.textContent = message;
+    if (message || !savedId) return;
+    const value = (name: string) => (unlockForm.elements.namedItem(name) as HTMLInputElement).value;
+    const button = unlockForm.querySelector<HTMLButtonElement>("button[type=submit]")!;
+    button.disabled = true;
+    try {
+      const res = await fetch("/api/unlock", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          id: savedId,
+          session,
+          consent: true,
+          contact: { name: value("name"), whatsapp: value("whatsapp"), email: value("email") },
+        }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      const saved = (await res.json()) as Saved;
+      if (saved.unlocked) renderFull(saved);
+    } catch {
+      unlockError.textContent = "No pude guardar tus datos. Intenta de nuevo en un momento.";
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  panel.querySelector("[data-restart]")!.addEventListener("click", () => {
+    const url = new URL(location.href);
+    url.searchParams.delete("r");
+    history.replaceState(null, "", url);
+    savedId = null;
+    result.hidden = true;
+    form.hidden = false;
+    show(0);
+  });
+
+  function start() {
+    form.hidden = false;
+    show(0);
+    track("view");
+  }
+
+  // ?r=<id> opens a saved result; anything else starts the questions.
+  const id = params.get("r");
+  if (id && /^[a-z0-9]{10}$/.test(id)) {
+    fetch(`/api/result?id=${id}`)
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((saved: Saved) => {
+        render(saved.answers);
+        renderSaved(saved);
+      })
+      .catch(start);
+  } else start();
+</script>
+
+<style>
+  .scan { scroll-margin-top: 16px; }
+  /* The display rules below would otherwise beat the hidden attribute. */
+  .scan [hidden] { display: none !important; }
+  .scan-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .scan fieldset { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .scan legend, .scan .q {
+    font-family: var(--f-display); font-weight: 700; font-size: 18px; line-height: 1.3;
+    letter-spacing: -.01em; padding: 0; margin-bottom: 4px;
+  }
+  .scan .q { margin-top: 10px; }
+  .hint { font-size: 14px; color: var(--ink-3); }
+  .scan input[type="text"] {
+    width: 100%; font: inherit; font-size: 17px; color: var(--ink);
+    background: var(--ground); border: 1px solid var(--rule-strong); border-radius: 3px; padding: 12px 14px;
+  }
+  .scan input[type="text"]:focus { outline: 2px solid var(--signal); outline-offset: 1px; border-color: var(--signal); }
+  .unit { display: flex; align-items: center; gap: 10px; }
+  .unit input[type="text"] { max-width: 9em; }
+  .unit span { color: var(--ink-2); font-size: 15px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips-col { flex-direction: column; }
+  .chips-n .pick span { min-width: 44px; justify-content: center; }
+  .pick { position: relative; }
+  .pick input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .pick span {
+    display: flex; align-items: center; min-height: 44px; padding: 10px 14px;
+    border: 1px solid var(--rule-strong); border-radius: 3px; background: var(--ground);
+    font-size: 15.5px; color: var(--ink); transition: border-color .15s, background .15s;
+  }
+  .pick input:hover + span { border-color: var(--signal); }
+  .pick input:checked + span { border-color: var(--signal); background: var(--signal-wash); color: var(--ink); }
+  .pick input:focus-visible + span { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+  .scan-error { color: var(--signal-deep); font-size: 14.5px; min-height: 1.2em; }
+  .scan-error:empty { display: none; }
+  .scan-nav { display: flex; gap: 10px; justify-content: space-between; }
+  .scan-nav [data-next] { margin-left: auto; }
+  .scan button { cursor: pointer; background: none; font: inherit; font-family: var(--f-display); font-weight: 700; font-size: 15px; }
+  .scan button.btn-a { background: var(--signal); }
+  .scan button.btn-a:hover { background: var(--signal-deep); }
+
+  .fuga {
+    font-family: var(--f-display); font-weight: 800; font-size: clamp(28px, 4.4vw, 40px);
+    line-height: 1.08; letter-spacing: -.03em; color: var(--signal); font-variant-numeric: tabular-nums;
+  }
+  .fuga-money { font-family: var(--f-display); font-weight: 700; font-size: 21px; line-height: 1.25; letter-spacing: -.015em; }
+  .fuga-basis { color: var(--ink-2); font-size: 15.5px; }
+  .scan .cta-row { margin-top: 6px; }
+  .finding { border-left: 3px solid var(--signal); padding: 4px 0 4px 14px; display: flex; flex-direction: column; gap: 6px; }
+  .finding-title { font-family: var(--f-display); font-weight: 700; font-size: 17px; line-height: 1.3; }
+  .finding-detail { color: var(--ink-2); font-size: 15px; }
+
+  .unlock, .full { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--rule); padding-top: 18px; }
+  .unlock-lede { color: var(--ink-2); font-size: 15.5px; }
+  .unlock .q { margin-top: 4px; margin-bottom: 0; font-size: 16px; }
+  .unlock .opt { font-weight: 400; color: var(--ink-3); }
+  .unit.phone input[type="text"] { max-width: none; }
+  .unit.phone span { font-size: 17px; color: var(--ink); }
+  .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; color: var(--ink-2); cursor: pointer; }
+  .consent input { margin-top: 3px; width: 18px; height: 18px; flex: none; accent-color: var(--signal); }
+  .consent a { color: var(--ink); text-decoration: underline; }
+  .unlock button[type="submit"] { align-self: flex-start; }
+  .unlock button[disabled] { opacity: .6; cursor: wait; }
+
+  .full { gap: 22px; }
+  .full-sec { display: flex; flex-direction: column; gap: 10px; }
+  /* Built by the script, so outside Astro's scoping. */
+  .full :global(.breakdown) { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+  .full :global(.breakdown + .breakdown) { margin-top: 12px; }
+  .full :global(.breakdown caption) { text-align: left; font-family: var(--f-display); font-weight: 700; font-size: 16px; padding-bottom: 6px; }
+  .full :global(.breakdown td) { padding: 7px 0; border-top: 1px solid var(--rule); color: var(--ink-2); vertical-align: top; }
+  .full :global(.breakdown td:last-child) { text-align: right; color: var(--ink); font-weight: 600; padding-left: 12px; }
+  .list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .list :global(li) { border-left: 3px solid var(--signal); padding: 2px 0 2px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .list :global(.item-title) { font-family: var(--f-display); font-weight: 700; font-size: 16.5px; line-height: 1.3; }
+  .list :global(.item-body) { color: var(--ink-2); font-size: 15px; }
+  .route { background: var(--signal-wash); border-radius: 3px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .route-title { font-family: var(--f-display); font-weight: 800; font-size: 19px; line-height: 1.25; letter-spacing: -.015em; }
+  .route-body { color: var(--ink-2); font-size: 15.5px; }
+  .route .btn { align-self: flex-start; }
+</style>
