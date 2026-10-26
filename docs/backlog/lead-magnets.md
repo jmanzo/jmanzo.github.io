@@ -68,6 +68,40 @@ Un solo Escaneo, en `/es/operar-a-mano/`:
 
 Todos los leads sirven además para ofrecer los servicios de CRO y desarrollo de siempre.
 
+### Outreach: ICP y Pista C (aprobados el 26/10/2026)
+
+Reemplaza el ángulo de velocidad para DTC-LatAm, también con los leads que iban a mitad de secuencia. DTC-EN sigue con la secuencia genérica de Jean en Notion ("Secuencia Outbound Shopify"). La Pista C está copiada en el Wiki de Notion de Jean ("Secuencia Outbound Operar a mano"). Si las dos versiones difieren, gana este archivo. Las skills de la Regla de 100 quedan en pausa: Jean elige a mano el canal y la forma de contacto.
+
+**ICP DTC-LatAm.** Entra si cumple las 3:
+
+1. LatAm hispana.
+2. Pauta activa en Meta Ads Library, como señal de volumen. Mejor con 3 o más anuncios activos.
+3. Al menos una señal de operación: contraentrega (Releasit, EasySell o el texto "pago contra entrega"), WhatsApp de ventas publicado o botón de WhatsApp, pagos con comprobante (Nequi, Daviplata, Yape, Plin, Pago Móvil, Zelle, transferencia) o señales de Dropi o dropshipping.
+
+- **A quién:** dueño, fundador o quien lleva la operación. No a marketing.
+- **No entran:** marcas grandes con call center o equipo de operación, marketplaces, Vaangroup y sus clientes.
+- **Plataforma:** no es condición. Primero las tiendas Shopify, porque son las únicas que entran al experimento. Las demás salen del Escaneo por la ruta "espera" y reciben la oferta de migración a Shopify.
+
+**Secuencia.** Cadencia de día 0, 2, 5, 9 y 14. En cuanto responde, la secuencia se detiene y se pasa a las respuestas. Variables: `[name]`, `[brand]`, `[señal]` (lo que se vio en su tienda), `[video]`, `[tiempo]`. El `?c=` del link va según el canal (`wa`, `li`, `em`).
+
+- **Día 0, gancho:** Hola [name], ¿cómo va todo en [brand]? Vi que [señal]. Pregunta rápida: ¿cuántas horas al día se les van confirmando pedidos, revisando comprobantes y pasándolos a la transportadora? Armé una calculadora de 1 minuto que lo pasa a horas y plata al mes con tus números. ¿Te la paso?
+- **Día 2, seguimiento corto:** Hola [name], ¿pudiste ver esto? Solo por saber si en [brand] los pedidos se confirman a mano o ya tienen algo automático.
+- **Día 5, valor:** Hola [name], te cuento por qué pregunto: cada pedido contraentrega que no se confirma a tiempo es un envío que puede volver, y ese envío lo paga la tienda. La calculadora te dice cuánto es eso en [brand] al mes, y si la haces te grabo un video de 20 s con tus productos donde un pedido se confirma solo. ¿Te paso el link?
+- **Día 9, prioridad:** Hola [name], asumo que la confirmación de pedidos de [brand] ya está resuelta y no es prioridad ahora, ¿correcto?
+- **Día 14, cierre:** Hola [name], cierro el tema por aquí para no saturarte. Si en algún momento confirmar pedidos y revisar comprobantes les quita demasiado tiempo, la calculadora sigue en pie y me puedes escribir por acá.
+
+**Respuestas.**
+
+- **A, dice que sí:** Aquí está: jeanmanzo.com/es/operar-a-mano/?c=wa (5 preguntas, el resultado sale al instante). Si el número te sorprende, te muestro cómo se vería resuelto con tus productos.
+- **B, pide la Comprobación:** Gracias, [name]. Ya vi tu resultado. Te preparo la demo con productos de [brand] y te la mando mañana. Para armarla bien: ¿trabajan con Dropi o con qué transportadora?
+- **C, video y oferta:** [name], así se verían los pedidos de [brand] procesándose solos: [video]. Además le escribí a su WhatsApp de ventas como cliente: tardaron [tiempo] en responder. Sigue la oferta: los módulos que le aplican, fundador con setup de US$197 más el Plan desde US$99 al mes, 50% para arrancar, primer módulo en 7 días y la garantía de 30 días.
+
+**Reglas.**
+
+- La prueba del WhatsApp de ventas no se anuncia antes: se cuenta en el mensaje del video.
+- El precio nunca va en el outreach. Aparece solo en la respuesta C.
+- Asuntos de email: "pregunta rápida [brand]" o "los pedidos de [brand]".
+
 ### CRM (versión 1)
 
 Puente sin tocar `outreach-os`: el Escaneo guarda el perfil en Klaviyo y le envía un aviso a Jean por un bot de Telegram, y Jean crea el lead a mano con "Add prospect". La integración correcta está en el ticket `crm-intake-escaneos.md`.
